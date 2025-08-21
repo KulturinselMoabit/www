@@ -6,7 +6,7 @@
   --gap-col:   1fr;
   --gutter:    2rem;
   --pad-lg:    2rem;
-  --pad-sm:    .75rem;
+  --pad-sm:    .75rem; 
 }
 
 /* Reset */
@@ -323,3 +323,4 @@ body {
 .fete-page .fete-slider { overflow: hidden; }
 .fete-page .fete-dots { padding: 0 .35rem; }
 .fete-page .fete-control { width: 2rem; height: 2rem; line-height: 2rem; }
+
