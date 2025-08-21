@@ -12,6 +12,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap" rel="stylesheet">
   <!-- CSS -->
   <link rel="stylesheet" href="../styles.css?v=simple-banner" />
+
+  <!-- nur für Messphase: Punkte ausblenden (beeinflusst nichts sichtbar im Endzustand) -->
+  <style>
+    .fete-page .lineup .acts.measuring li + li::before { content: none !important; }
+  </style>
 </head>
 <body class="fete-page">
 
@@ -127,7 +132,7 @@
     })();
   </script>
 
-  <!-- JS: Slideshow -->
+  <!-- JS: Slideshow (unverändert) -->
   <script>
   (function(){
     var slider=document.getElementById('feteSlider');
@@ -392,31 +397,67 @@
   })();
   </script>
 
-  <!-- JS: Line-up – Punkte NUR am echten Zeilenanfang (Top-Toleranz 5px) -->
+  <!-- JS: Line-up – stabile Punkte-Logik (2-Phasen-Messung) -->
   <script>
   (function () {
-    function updateLineupSeparators() {
-      var lists=document.querySelectorAll('.lineup .acts');
-      Array.prototype.forEach.call(lists, function(ul){
-        var items=Array.prototype.slice.call(ul.children);
-        var lastTop=null;
-        var TOL=5; // px – erst neue Zeile, wenn der Top-Wert deutlich springt
+    function computeStarts(ul) {
+      var items = Array.prototype.slice.call(ul.children);
+      var starts = [];
+      var lastTop = null;
 
-        items.forEach(function(li, idx){
-          li.classList.remove('row-start');
-          var top=li.getBoundingClientRect().top;
-          if (idx===0 || lastTop===null || (top - lastTop) > TOL){
-            li.classList.add('row-start');
-            lastTop = top;
-          }
-        });
+      items.forEach(function(li, idx){
+        var t = Math.round(li.getBoundingClientRect().top);
+        if (idx === 0 || lastTop === null || Math.abs(t - lastTop) > 1) {
+          starts.push(idx);
+          lastTop = t;
+        }
+      });
+      return starts;
+    }
+
+    function applyStarts(ul, starts) {
+      var items = Array.prototype.slice.call(ul.children);
+      items.forEach(function(li){ li.classList.remove('row-start'); });
+      starts.forEach(function(i){ if(items[i]) items[i].classList.add('row-start'); });
+    }
+
+    function startsEqual(a,b){
+      if (a.length !== b.length) return false;
+      for (var i=0;i<a.length;i++){ if (a[i] !== b[i]) return false; }
+      return true;
+    }
+
+    function updateLineupSeparators() {
+      var lists = document.querySelectorAll('.lineup .acts');
+      Array.prototype.forEach.call(lists, function(ul){
+        // Phase 0: Basiszustand (alles ohne row-start)
+        Array.prototype.forEach.call(ul.children, function(li){ li.classList.remove('row-start'); });
+
+        // Phase 1: ohne Punkte messen
+        ul.classList.add('measuring');
+        void ul.offsetWidth; // Reflow erzwingen
+        var s1 = computeStarts(ul);
+        ul.classList.remove('measuring');
+
+        // Anwenden und real messen
+        applyStarts(ul, s1);
+        void ul.offsetWidth;
+        var s2 = computeStarts(ul);
+
+        // Falls sich durch das Einfügen/Entfernen der Punkte etwas geändert hat, final anwenden
+        if (!startsEqual(s1, s2)) {
+          applyStarts(ul, s2);
+        }
       });
     }
+
     var deb=(function(){var id; return function(){ clearTimeout(id); id=setTimeout(updateLineupSeparators, 100); };})();
     window.addEventListener('load', updateLineupSeparators);
     window.addEventListener('resize', deb);
     window.addEventListener('orientationchange', deb);
     if (document.fonts && document.fonts.ready) { document.fonts.ready.then(updateLineupSeparators); }
+    // Safety: nach CSV-Render wird ein resize-Event getriggert; hier nochmal als Backup:
+    setTimeout(updateLineupSeparators, 500);
   })();
   </script>
 </body>
