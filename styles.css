@@ -95,7 +95,7 @@ body {
 .page-text .divider { width: 3rem; height: 1px; background: var(--highlight); margin: 0 auto 2rem; border: none; }
 .page-text .divider_long { width: 9rem; height: 1px; background: var(--highlight); margin: 0 auto 2rem; border: none; }
 .page-text p { margin-bottom: 1.5rem; font-size: 1rem; line-height: 1.2; text-align: justify; }
-.page-text img.fullwidth { width: 100%; height: auto; display: block; float: none; margin: 0; }
+.page-text img.fullwidth { width: 100%; height: auto; display: block; float: none; }
 
 /* ----------Bilder im Text-------------- */
 .page-text img.float-left-third   { float: left;  width: 33.333%; height: auto; margin: 0 1em 1em 0; display: block; box-shadow: 0 0 8px rgba(0,0,0,.1); }
@@ -272,6 +272,38 @@ body {
   color: var(--highlight); opacity: .95;
 }
 .fete-page .lineup .acts li.row-start::before{ content: none; }
+
+/* >>> NEU: CSV-Buttons wie Text + rote Hover-Unterlinie (nur Fête) <<< */
+.fete-page .lineup .acts .lu-act{
+  background: none;
+  border: none;
+  padding: 0 .02em;
+  margin: 0;
+  font: inherit;             /* übernimmt Rubik Dirt & Größe */
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  display: inline-block;     /* für Unterlinie */
+  cursor: pointer;
+  position: relative;
+}
+.fete-page .lineup .acts .lu-act::-moz-focus-inner{ border:0; padding:0; }
+.fete-page .lineup .acts .lu-act::after{
+  content:'';
+  position:absolute;
+  left:50%; bottom:-.05em;
+  transform: translateX(-50%);
+  width:0; height:.08em;
+  background: var(--highlight);
+  transition: width .25s ease;
+}
+.fete-page .lineup .acts .lu-act:hover::after,
+.fete-page .lineup .acts .lu-act:focus-visible::after{ width:100%; }
+.fete-page .lineup .acts .lu-act:focus-visible{
+  outline:2px solid var(--highlight);
+  outline-offset:.08em;
+}
 
 @media (max-width: 768px) {
   .fete-page .lineup { margin: 1.6rem 0 2rem; }
