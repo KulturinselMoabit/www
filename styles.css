@@ -256,7 +256,9 @@ body {
 /* Acts */
 .fete-page .lineup .acts{
   list-style: none; margin: 0 0 1.4rem 0; padding: 0;
-  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+  display: flex; flex-wrap: wrap; justify-content: center;
+  /* WICHTIG: Top-Alignment für stabile Zeilenerkennung */
+  align-items: flex-start;
   row-gap: var(--lineup-row-gap); text-align: center;
 }
 .fete-page .lineup .acts li{
@@ -273,37 +275,20 @@ body {
 }
 .fete-page .lineup .acts li.row-start::before{ content: none; }
 
-/* >>> NEU: CSV-Buttons wie Text + rote Hover-Unterlinie (nur Fête) <<< */
+/* CSV-Buttons wie Text + rote Hover-Unterlinie */
 .fete-page .lineup .acts .lu-act{
-  background: none;
-  border: none;
-  padding: 0 .02em;
-  margin: 0;
-  font: inherit;             /* übernimmt Rubik Dirt & Größe */
-  color: inherit;
-  text-transform: inherit;
-  letter-spacing: inherit;
-  line-height: inherit;
-  display: inline-block;     /* für Unterlinie */
-  cursor: pointer;
-  position: relative;
+  background: none; border: none; padding: 0 .02em; margin: 0;
+  font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; line-height: inherit;
+  display: inline-block; cursor: pointer; position: relative;
 }
 .fete-page .lineup .acts .lu-act::-moz-focus-inner{ border:0; padding:0; }
 .fete-page .lineup .acts .lu-act::after{
-  content:'';
-  position:absolute;
-  left:50%; bottom:-.05em;
-  transform: translateX(-50%);
-  width:0; height:.08em;
-  background: var(--highlight);
-  transition: width .25s ease;
+  content:''; position:absolute; left:50%; bottom:-.05em; transform: translateX(-50%);
+  width:0; height:.08em; background: var(--highlight); transition: width .25s ease;
 }
 .fete-page .lineup .acts .lu-act:hover::after,
 .fete-page .lineup .acts .lu-act:focus-visible::after{ width:100%; }
-.fete-page .lineup .acts .lu-act:focus-visible{
-  outline:2px solid var(--highlight);
-  outline-offset:.08em;
-}
+.fete-page .lineup .acts .lu-act:focus-visible{ outline:2px solid var(--highlight); outline-offset:.08em; }
 
 @media (max-width: 768px) {
   .fete-page .lineup { margin: 1.6rem 0 2rem; }
@@ -331,12 +316,7 @@ body {
   }
 }
 .fete-page img,
-.fete-page video {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  box-sizing: border-box;
-}
+.fete-page video { display: block; max-width: 100%; height: auto; box-sizing: border-box; }
 .fete-page { overflow-x: hidden; }
 .fete-page .lineup .acts { padding-inline: .25rem; }
 .fete-page .lineup .acts li{ overflow-wrap: anywhere; word-break: break-word; hyphens: auto; }
