@@ -83,41 +83,24 @@
           </noscript>
         </section>
 
-        <!-- ===== LINE-UP ===== -->
-        <section class="lineup">
+        <!-- ===== LINE-UP (dynamisch aus CSV, ohne CSS-Änderungen) ===== -->
+        <section class="lineup" id="lineup">
           <div class="lineup-wrap">
             <div class="lineup-heading">Line-Up</div>
-
-            <div class="line">
-              <div class="lineup-daytag">FR. 29. AUGUST</div>
-              <ul class="acts" aria-label="Line-up Freitag, 29. August">
-                <li>Futari</li>
-                <li>Die Brehmes'</li>
-                <li>Kleiner Held</li>
-                <li>Circus Rhapsody</li>
-                <li>Blue Saloon</li>
-                <li>Yooshton und Samoh</li>
-              </ul>
-            </div>
-
-            <div class="line">
-              <div class="lineup-daytag">SA. 30. AUGUST</div>
-              <ul class="acts" aria-label="Line-up Samstag, 30. August">
-                <li>Kindertheater</li>
-                <li>Kinderchor</li>
-                <li>Christin Rohr</li>
-                <li>Eine musikalische Piratenreise</li>
-                <li>Noah und Safa</li>
-                <li>Julius Kayser</li>
-                <li>Crescendo Planet</li>
-                <li>Kvytlyst</li>
-                <li>Ein schlechter Witz</li>
-                <li>TwoPointO</li>
-                <li>Maindish</li>
-                <li>XIX</li>
-              </ul>
-            </div>
+            <!-- Dynamischer Inhalt hier hinein -->
+            <div class="lu-root" aria-live="polite"></div>
           </div>
+
+          <!-- Zugängliches Modal (Standard-Dialog, keine Styles hinzugefügt) -->
+          <dialog id="luModal" aria-label="Details">
+            <button type="button" class="lu-close" aria-label="Schließen">×</button>
+            <div class="lu-media-wrap" hidden>
+              <img class="lu-media" alt="" loading="lazy" />
+            </div>
+            <h3 class="lu-title"></h3>
+            <div class="lu-time"></div>
+            <div class="lu-desc"></div>
+          </dialog>
         </section>
         <!-- ===== /LINE-UP ===== -->
 
@@ -237,7 +220,7 @@
         wrap.appendChild(node);
         slider.insertBefore(wrap, dotsWrap);
 
-        const dot = mk('button','fete-dot');
+      const dot = mk('button','fete-dot');
         dot.type='button';
         dot.setAttribute('aria-label','Slide '+(i+1));
         dotsWrap.appendChild(dot);
@@ -298,7 +281,211 @@
   })();
   </script>
 
-  <!-- JS: Line-up – kein Punkt am Zeilenanfang -->
+  <!-- PapaParse für CSV -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <!-- CSV → Line-up Renderer (ohne CSS-Änderungen) -->
+  <script>
+  (function(){
+    // Konfiguration
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRkYgQhBk53GOGABV_qzv3ZqjgSfR61ZH9_fX-uejRTUOQ4EtAgARUXXIayqaPKWRr5hBRMCH219-_j/pub?output=csv";
+    const IMG_BASE = ""; // optional, z.B. "/assets/lineup/"
+
+    const wrap = document.querySelector('.lineup .lineup-wrap');
+    const root = document.querySelector('.lineup .lu-root');
+    if (!wrap || !root) return;
+
+    // evtl. statische Einträge entfernen (wir rendern komplett neu)
+    Array.from(wrap.querySelectorAll('.line')).forEach(n => n.remove());
+
+    // Helpers
+    const norm = s => (s ?? "").toString().trim();
+    const lc = s => norm(s).toLowerCase();
+    function pick(obj, keys){
+      const map = {};
+      Object.keys(obj || {}).forEach(k => map[lc(k)] = obj[k]);
+      for (const key of keys){
+        const kk = lc(key);
+        if (map.hasOwnProperty(kk)) return norm(map[kk]);
+      }
+      const want = keys.map(lc);
+      for (const k in map){
+        if (want.some(w => k.includes(w))) return norm(map[k]);
+      }
+      return "";
+    }
+    function timeToMinutes(str){
+      const s = lc(str).replace(/[^\d:.,-]/g, "").replace(",", ":").replace(".", ":");
+      const m = s.match(/(\d{1,2})[:.]?(\d{2})?/);
+      if (!m) return Number.POSITIVE_INFINITY;
+      const h = parseInt(m[1],10);
+      const mm = m[2] ? parseInt(m[2],10) : 0;
+      if (isNaN(h) || isNaN(mm)) return Number.POSITIVE_INFINITY;
+      return h*60 + mm;
+    }
+    function fmtTime(start, end){
+      const s = norm(start), e = norm(end);
+      if (!s && !e) return "";
+      if (s && !e) return s;
+      if (!s && e) return e;
+      return s + "–" + e;
+    }
+    function normalizeDayLabel(dayRaw){
+      const d = lc(dayRaw);
+      if (!d) return norm(dayRaw);
+      if (["fr","fr.","fri","fre","freitag","friday"].includes(d)) return "FR. 29. AUGUST";
+      if (["sa","sa.","sam","samstag","sat","saturday"].includes(d)) return "SA. 30. AUGUST";
+      return norm(dayRaw);
+    }
+    function imgURL(v){
+      const u = norm(v);
+      if (!u) return "";
+      if (/^https?:\/\//i.test(u) || u.startsWith("/") || u.startsWith("data:")) return u;
+      const base = norm(IMG_BASE);
+      if (!base) return u;
+      return (base.endsWith("/") ? base : base + "/") + u.replace(/^\/+/, "");
+    }
+
+    // Modal-Elemente (Standarddialog, keine Styles)
+    const dlg = document.getElementById('luModal');
+    const dlgClose = dlg?.querySelector('.lu-close');
+    const dlgImgWrap = dlg?.querySelector('.lu-media-wrap');
+    const dlgImg = dlg?.querySelector('.lu-media');
+    const dlgTitle = dlg?.querySelector('.lu-title');
+    const dlgTime = dlg?.querySelector('.lu-time');
+    const dlgDesc = dlg?.querySelector('.lu-desc');
+
+    function openModal({title, time, desc, image}){
+      if (!dlg) return;
+      dlgTitle.textContent = title || "";
+      dlgTime.textContent = time || "";
+      if (image){
+        dlgImgWrap.hidden = false;
+        dlgImg.src = image;
+        dlgImg.alt = title || "";
+      } else {
+        dlgImg.src = "";
+        dlgImg.alt = "";
+        dlgImgWrap.hidden = true;
+      }
+      dlgDesc.textContent = "";
+      if (desc){
+        const parts = desc.split(/\r?\n/);
+        parts.forEach((line, i) => {
+          if (i) dlgDesc.appendChild(document.createElement('br'));
+          dlgDesc.appendChild(document.createTextNode(line));
+        });
+      }
+      try { dlg.showModal(); } catch(e){ dlg.setAttribute('open',''); }
+      setTimeout(()=>{ dlgClose?.focus(); }, 0);
+    }
+    function closeModal(){ dlg?.close?.(); dlg?.removeAttribute('open'); }
+    dlgClose?.addEventListener('click', closeModal);
+    dlg?.addEventListener('cancel', (e)=>{ e.preventDefault(); closeModal(); });
+    dlg?.addEventListener('click', (e)=>{
+      const r = dlg.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom){
+        closeModal();
+      }
+    });
+
+    // Render eines Tagesblocks
+    function renderDayBlock(dayLabel, acts){
+      const day = document.createElement('div');
+      day.className = 'line';
+
+      const tag = document.createElement('div');
+      tag.className = 'lineup-daytag';
+      tag.textContent = dayLabel;
+      day.appendChild(tag);
+
+      const ul = document.createElement('ul');
+      ul.className = 'acts';
+      ul.setAttribute('aria-label', 'Line-up ' + dayLabel);
+
+      acts.forEach(a => {
+        const li = document.createElement('li');
+        // Klickbarer Name als "unsichtbarer Button"
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'lu-act'; // keine Styles; Optik bleibt wie Text
+        btn.setAttribute('aria-haspopup','dialog');
+        btn.textContent = a.artist || "–";
+        btn.addEventListener('click', ()=>{
+          openModal({
+            title: a.artist,
+            time: fmtTime(a.start, a.end),
+            desc: a.description,
+            image: a.image
+          });
+        });
+        li.appendChild(btn);
+        ul.appendChild(li);
+      });
+
+      day.appendChild(ul);
+      return day;
+    }
+
+    async function load(){
+      let text = "";
+      try {
+        const res = await fetch(CSV_URL, { cache: 'no-store' });
+        text = await res.text();
+      } catch(e){
+        console.error("CSV konnte nicht geladen werden:", e);
+        return;
+      }
+
+      const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+      const rows = (parsed.data || []).filter(r => Object.values(r).some(v => norm(v)));
+      if (!rows.length) return;
+
+      const groups = []; // [{key, label, items: []}] – Reihenfolge wie im CSV
+      const byKey = new Map();
+
+      const DAY_KEYS  = ["day","tag","wochentag","datum"];
+      const START_KEYS= ["start","startzeit","beginn"];
+      const END_KEYS  = ["end","ende","endzeit"];
+      const ART_KEYS  = ["artist","band","name","bandname"];
+      const DESC_KEYS = ["description","beschreibung","text","info"];
+      const IMG_KEYS  = ["image","bild","bildurl","foto","image_url","url"];
+
+      for (const row of rows){
+        const artist = pick(row, ART_KEYS);
+        if (!artist) continue;
+
+        const dayRaw = pick(row, DAY_KEYS) || "";
+        const start = pick(row, START_KEYS);
+        const end   = pick(row, END_KEYS);
+        const description = pick(row, DESC_KEYS);
+        const image = imgURL(pick(row, IMG_KEYS));
+
+        const key = lc(dayRaw) || "lineup";
+        if (!byKey.has(key)){
+          const label = normalizeDayLabel(dayRaw || "Line-up");
+          const entry = { key, label, items: [] };
+          byKey.set(key, entry);
+          groups.push(entry);
+        }
+        byKey.get(key).items.push({ artist, start, end, description, image, t: timeToMinutes(start) });
+      }
+
+      groups.forEach(g => g.items.sort((a,b)=> a.t - b.t ));
+
+      for (const g of groups){
+        root.appendChild(renderDayBlock(g.label, g.items));
+      }
+
+      // Trigger dein vorhandenes "row-start" Skript nach dem Rendern
+      setTimeout(()=> window.dispatchEvent(new Event('resize')), 0);
+    }
+
+    load();
+  })();
+  </script>
+
+  <!-- JS: Line-up – kein Punkt am Zeilenanfang (unverändert) -->
   <script>
   (function () {
     function updateLineupSeparators() {
