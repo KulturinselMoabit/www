@@ -18,7 +18,7 @@
   <!-- HEADER -->
   <header id="site-header">
     <div class="container header-inner">
-      <div class="logo"><img src="/logo.svg" alt="Logo Kulturinsel Moabit" /></div>
+      <div class="logo"><img src="../logo.svg" alt="Logo Kulturinsel Moabit" /></div>
       <nav class="site-nav">
         <button class="menu-toggle" aria-label="Menü öffnen / schließen"><span></span><span></span><span></span></button>
         <ul>
@@ -392,29 +392,31 @@
   })();
   </script>
 
-  <!-- JS: Line-up – Punkte-Logik (neue, einfache & stabile Version) -->
+  <!-- JS: Line-up – Punkte NUR am echten Zeilenanfang (Top-Toleranz 5px) -->
   <script>
   (function () {
     function updateLineupSeparators() {
       var lists=document.querySelectorAll('.lineup .acts');
       Array.prototype.forEach.call(lists, function(ul){
         var items=Array.prototype.slice.call(ul.children);
-        var lastTop=-1;
+        var lastTop=null;
+        var TOL=5; // px – erst neue Zeile, wenn der Top-Wert deutlich springt
+
         items.forEach(function(li, idx){
           li.classList.remove('row-start');
-          var t=Math.round(li.offsetTop);
-          if(idx===0 || t!==lastTop){
-            li.classList.add('row-start'); // erster in der Zeile → kein Punkt davor
-            lastTop=t;
+          var top=li.getBoundingClientRect().top;
+          if (idx===0 || lastTop===null || (top - lastTop) > TOL){
+            li.classList.add('row-start');
+            lastTop = top;
           }
         });
       });
     }
-    var deb=(function(){var id; return function(){ cancelAnimationFrame(id); id=requestAnimationFrame(updateLineupSeparators); };})();
+    var deb=(function(){var id; return function(){ clearTimeout(id); id=setTimeout(updateLineupSeparators, 100); };})();
     window.addEventListener('load', updateLineupSeparators);
     window.addEventListener('resize', deb);
     window.addEventListener('orientationchange', deb);
-    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(deb); }
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(updateLineupSeparators); }
   })();
   </script>
 </body>
