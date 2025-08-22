@@ -14,11 +14,6 @@
 
   <!-- CSS -->
   <link rel="stylesheet" href="../styles.css?v=simple-banner" />
-
-  <!-- Nur hier: Wenn JS .js-seps setzt, alte CSS-Punkte abschalten -->
-  <style>
-    .fete-page .lineup .acts.js-seps li + li::before { content: none !important; }
-  </style>
 </head>
 <body class="fete-page">
 
@@ -49,7 +44,7 @@
           <img class="fete-banner-img" src="fete-banner.svg" alt="Fête du Seeee – Banner" />
         </section>
 
-        <!-- Meta-Zeile -->
+        <!-- Meta -->
         <div class="fete-meta">
           <span>Strandbad Tegelsee</span>
           <span class="sep">•</span>
@@ -123,79 +118,142 @@
   <!-- JS: Burger-Menü -->
   <script>
     (function(){
-      const btn=document.querySelector('.menu-toggle');
-      const nav=document.querySelector('.site-nav ul');
+      var btn=document.querySelector('.menu-toggle');
+      var nav=document.querySelector('.site-nav ul');
       if(btn && nav){
-        btn.addEventListener('click', ()=>{ nav.classList.toggle('open'); btn.classList.toggle('open'); });
+        btn.addEventListener('click', function(){
+          nav.classList.toggle('open');
+          btn.classList.toggle('open');
+        });
       }
     })();
   </script>
 
-  <!-- JS: Slideshow (wie gehabt) -->
+  <!-- JS: Slideshow (unverändert) -->
   <script>
   (function(){
-    const slider=document.getElementById('feteSlider');
+    var slider=document.getElementById('feteSlider');
     if(!slider) return;
 
-    let prevBtn=slider.querySelector('.fete-control.prev');
-    let nextBtn=slider.querySelector('.fete-control.next');
-    let dotsWrap=slider.querySelector('.fete-dots');
+    var prevBtn=slider.querySelector('.fete-control.prev');
+    var nextBtn=slider.querySelector('.fete-control.next');
+    var dotsWrap=slider.querySelector('.fete-dots');
 
-    function mk(tag,cls,txt){ const el=document.createElement(tag); if(cls) el.className=cls; if(txt!=null) el.textContent=txt; return el; }
+    function mk(tag,cls,txt){
+      var el=document.createElement(tag);
+      if(cls) el.className=cls;
+      if(txt!=null) el.textContent=txt;
+      return el;
+    }
     if(!prevBtn){ prevBtn=mk('button','fete-control prev','‹'); prevBtn.setAttribute('aria-label','Vorheriges'); slider.appendChild(prevBtn); }
     if(!nextBtn){ nextBtn=mk('button','fete-control next','›'); nextBtn.setAttribute('aria-label','Nächstes'); slider.appendChild(nextBtn); }
     if(!dotsWrap){ dotsWrap=mk('div','fete-dots'); dotsWrap.setAttribute('role','tablist'); dotsWrap.setAttribute('aria-label','Slideshow-Navigation'); slider.appendChild(dotsWrap); }
 
-    function folderPath(){ const p=location.pathname; if(p.endsWith('/')) return p; if(/\/index\.html?$/i.test(p)) return p.replace(/index\.html?$/i,''); if(p.includes('.')) return p.replace(/[^/]+$/, ''); return p + '/'; }
-    const base=location.origin + folderPath();
+    function folderPath(){
+      var p=location.pathname;
+      if(p.slice(-1)==='/') return p;
+      if(/\/index\.html?$/i.test(p)) return p.replace(/index\.html?$/i,'');
+      if(p.indexOf('.')>-1) return p.replace(/[^/]+$/,'');
+      return p+'/';
+    }
+    var base=location.origin+folderPath();
 
-    function loadImage(url){ return new Promise(res=>{ const img=new Image(); img.onload=()=>res({ok:true,node:img}); img.onerror=()=>res({ok:false}); img.decoding='async'; img.src=url; }); }
-    function loadVideo(url){ return new Promise(res=>{ const v=document.createElement('video'); v.preload='metadata'; v.muted=true; v.playsInline=true; v.setAttribute('playsinline',''); v.loop=true; const ok=()=>{c();res({ok:true,node:v});}; const err=()=>{c();res({ok:false});}; function c(){v.removeEventListener('loadedmetadata',ok); v.removeEventListener('error',err);} v.addEventListener('loadedmetadata',ok); v.addEventListener('error',err); v.src=url; }); }
-    function probe(n){ const jpg=base+`${n}.jpg`; return loadImage(jpg).then(r=>{ if(r.ok){ r.node.alt=`Festivalbild ${n}`; return {idx:n,node:r.node}; } const mp4=base+`${n}.mp4`; return loadVideo(mp4).then(r2=> r2.ok ? {idx:n,node:r2.node} : null); }); }
+    function loadImage(url){
+      return new Promise(function(resolve){
+        var img=new Image();
+        img.onload=function(){ resolve({ok:true,node:img}); };
+        img.onerror=function(){ resolve({ok:false}); };
+        img.decoding='async';
+        img.src=url;
+      });
+    }
+    function loadVideo(url){
+      return new Promise(function(resolve){
+        var v=document.createElement('video');
+        v.preload='metadata'; v.muted=true; v.playsInline=true; v.setAttribute('playsinline',''); v.loop=true;
+        function ok(){ cleanup(); resolve({ok:true,node:v}); }
+        function err(){ cleanup(); resolve({ok:false}); }
+        function cleanup(){ v.removeEventListener('loadedmetadata',ok); v.removeEventListener('error',err); }
+        v.addEventListener('loadedmetadata', ok);
+        v.addEventListener('error', err);
+        v.src = url;
+      });
+    }
+    function probe(n){
+      var jpg=base+n+'.jpg';
+      return loadImage(jpg).then(function(r){
+        if(r.ok){ r.node.alt='Festivalbild '+n; return {idx:n,node:r.node}; }
+        var mp4=base+n+'.mp4';
+        return loadVideo(mp4).then(function(r2){ return r2.ok ? {idx:n,node:r2.node} : null; });
+      });
+    }
 
     (function init(){
-      Promise.all(Array.from({length:9},(_,i)=>probe(i+1))).then(results=>{
-        const items=results.filter(Boolean).sort((a,b)=>a.idx-b.idx);
+      Promise.all(Array.from({length:9},function(_,i){return probe(i+1);})).then(function(results){
+        var items=results.filter(Boolean).sort(function(a,b){return a.idx-b.idx;});
         if(!items.length) return;
 
-        const slides=[], dots=[];
+        var slides=[], dots=[];
         function addSlide(node,i){
-          const wrap=mk('div','fete-slide'); wrap.setAttribute('data-index', i); wrap.setAttribute('aria-hidden','true'); wrap.appendChild(node);
+          var wrap=mk('div','fete-slide');
+          wrap.setAttribute('data-index', i);
+          wrap.setAttribute('aria-hidden','true');
+          wrap.appendChild(node);
           slider.insertBefore(wrap, dotsWrap);
-          const dot=mk('button','fete-dot'); dot.type='button'; dot.setAttribute('aria-label','Slide '+(i+1)); dotsWrap.appendChild(dot);
+
+          var dot=mk('button','fete-dot'); dot.type='button'; dot.setAttribute('aria-label','Slide '+(i+1));
+          dotsWrap.appendChild(dot);
+
           slides.push(wrap); dots.push(dot);
         }
-        items.forEach((it,i)=>addSlide(it.node,i));
+        items.forEach(function(it,i){ addSlide(it.node, i); });
 
-        slider.appendChild(prevBtn); slider.appendChild(nextBtn); slider.appendChild(dotsWrap);
+        slider.appendChild(prevBtn);
+        slider.appendChild(nextBtn);
+        slider.appendChild(dotsWrap);
 
-        let current=0;
+        var current=0;
         function show(i){
           current=(i+slides.length)%slides.length;
-          slides.forEach((el,idx)=>{ const active=idx===current; el.classList.toggle('active',active); el.setAttribute('aria-hidden', active?'false':'true'); const v=el.querySelector('video'); if(v){ active ? v.play().catch(()=>{}) : v.pause(); } });
-          dots.forEach((d,idx)=>d.classList.toggle('active', idx===current));
+          slides.forEach(function(el,idx){
+            var active=idx===current;
+            el.classList.toggle('active',active);
+            el.setAttribute('aria-hidden',active?'false':'true');
+            var v=el.querySelector('video');
+            if(v){ active ? v.play().catch(function(){}) : v.pause(); }
+          });
+          dots.forEach(function(d,idx){ d.classList.toggle('active', idx===current); });
         }
-        prevBtn.addEventListener('click', ()=>show(current-1));
-        nextBtn.addEventListener('click', ()=>show(current+1));
+
+        prevBtn.addEventListener('click', function(){ show(current-1); });
+        nextBtn.addEventListener('click', function(){ show(current+1); });
 
         slider.setAttribute('tabindex','0');
-        slider.addEventListener('keydown', e=>{ if(e.key==='ArrowLeft') show(current-1); if(e.key==='ArrowRight') show(current+1); });
+        slider.addEventListener('keydown', function(e){
+          if(e.key==='ArrowLeft') show(current-1);
+          if(e.key==='ArrowRight') show(current+1);
+        });
 
-        let sx=null;
-        slider.addEventListener('touchstart', e=>{ sx=e.touches[0].clientX; }, {passive:true});
-        slider.addEventListener('touchend', e=>{ if(sx==null) return; const dx=e.changedTouches[0].clientX - sx; if(Math.abs(dx)>40) (dx<0?show(current+1):show(current-1)); sx=null; }, {passive:true});
+        var sx=null;
+        slider.addEventListener('touchstart', function(e){ sx=e.touches[0].clientX; }, {passive:true});
+        slider.addEventListener('touchend',   function(e){
+          if(sx==null) return;
+          var dx=e.changedTouches[0].clientX - sx;
+          if(Math.abs(dx)>40) (dx<0 ? show(current+1) : show(current-1));
+          sx=null;
+        }, {passive:true});
 
         show(0);
 
-        let timer=null, hover=false;
+        var timer=null, hover=false;
         function next(){ nextBtn.click(); }
-        function start(){ if(!timer && slides.length>1) timer=setInterval(()=>{ if(!hover && !document.hidden) next(); }, 5000); }
+        function start(){ if(!timer && slides.length>1) timer=setInterval(function(){ if(!hover && !document.hidden) next(); }, 5000); }
         function stop(){ clearInterval(timer); timer=null; }
-        slider.addEventListener('mouseenter',()=>hover=true);
-        slider.addEventListener('mouseleave',()=>hover=false);
-        slider.addEventListener('touchstart', ()=>hover=true, {passive:true});
-        slider.addEventListener('touchend',   ()=>hover=false, {passive:true});
-        document.addEventListener('visibilitychange', ()=>{ document.hidden ? stop() : start(); });
+        slider.addEventListener('mouseenter',function(){ hover=true; });
+        slider.addEventListener('mouseleave',function(){ hover=false; });
+        slider.addEventListener('touchstart', function(){ hover=true; }, {passive:true});
+        slider.addEventListener('touchend',   function(){ hover=false; }, {passive:true});
+        document.addEventListener('visibilitychange', function(){ document.hidden ? stop() : start(); });
         start();
       });
     })();
@@ -208,58 +266,58 @@
   <!-- CSV → Line-up Renderer -->
   <script>
   (function(){
-    const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vRkYgQhBk53GOGABV_qzv3ZqjgSfR61ZH9_fX-uejRTUOQ4EtAgARUXXIayqaPKWRr5hBRMCH219-_j/pub?output=csv";
-    const IMG_BASE="";
+    var CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vRkYgQhBk53GOGABV_qzv3ZqjgSfR61ZH9_fX-uejRTUOQ4EtAgARUXXIayqaPKWRr5hBRMCH219-_j/pub?output=csv";
+    var IMG_BASE="";
 
-    const wrap=document.querySelector('.lineup .lineup-wrap');
-    const root=document.querySelector('.lineup .lu-root');
+    var wrap=document.querySelector('.lineup .lineup-wrap');
+    var root=document.querySelector('.lineup .lu-root');
     if(!wrap||!root) return;
 
-    const norm=s=> (s==null?"":String(s)).trim();
-    const lc=s=> norm(s).toLowerCase();
+    function norm(s){return (s==null?"":String(s)).trim();}
+    function lc(s){return norm(s).toLowerCase();}
     function pick(obj,keys){
-      const map={}; Object.keys(obj||{}).forEach(k=>map[lc(k)]=obj[k]);
-      for(const k of keys){ const kk=lc(k); if(map.hasOwnProperty(kk)) return norm(map[kk]); }
-      const want=keys.map(lc);
-      for(const k in map){ if(!map.hasOwnProperty(k)) continue; for(const w of want){ if(k.indexOf(w)!==-1) return norm(map[k]); } }
+      var map={}; Object.keys(obj||{}).forEach(function(k){ map[lc(k)]=obj[k]; });
+      for(var i=0;i<keys.length;i++){ var kk=lc(keys[i]); if(map.hasOwnProperty(kk)) return norm(map[kk]); }
+      var want=keys.map(function(k){return lc(k);});
+      for(var k in map){ if(!map.hasOwnProperty(k)) continue; for(var j=0;j<want.length;j++){ if(k.indexOf(want[j])!==-1) return norm(map[k]); } }
       return "";
     }
     function timeToMinutes(str){
-      const s=lc(str).replace(/[^\d:.,-]/g,"").replace(",",":").replace(".",":");
-      const m=s.match(/(\d{1,2})[:.]?(\d{2})?/); if(!m) return Number.POSITIVE_INFINITY;
-      const h=parseInt(m[1],10), mm=m[2]?parseInt(m[2],10):0;
+      var s=lc(str).replace(/[^\d:.,-]/g,"").replace(",",":").replace(".",":");
+      var m=s.match(/(\d{1,2})[:.]?(\d{2})?/); if(!m) return Number.POSITIVE_INFINITY;
+      var h=parseInt(m[1],10), mm=m[2]?parseInt(m[2],10):0;
       if(isNaN(h)||isNaN(mm)) return Number.POSITIVE_INFINITY;
       return h*60+mm;
     }
-    const fmtTime=(start,end)=>{ const s=norm(start), e=norm(end); if(!s&&!e) return ""; if(s&&!e) return s; if(!s&&e) return e; return s+"–"+e; };
+    function fmtTime(start,end){ var s=norm(start), e=norm(end); if(!s&&!e) return ""; if(s&&!e) return s; if(!s&&e) return e; return s+"–"+e; }
     function normalizeDayLabel(dayRaw){
-      const d=lc(dayRaw); if(!d) return norm(dayRaw);
-      if(["fr","fr.","fri","fre","freitag","friday"].includes(d)) return "FR. 29. AUGUST";
-      if(["sa","sa.","sam","samstag","sat","saturday"].includes(d)) return "SA. 30. AUGUST";
+      var d=lc(dayRaw); if(!d) return norm(dayRaw);
+      if(["fr","fr.","fri","fre","freitag","friday"].indexOf(d)!==-1) return "FR. 29. AUGUST";
+      if(["sa","sa.","sam","samstag","sat","saturday"].indexOf(d)!==-1) return "SA. 30. AUGUST";
       return norm(dayRaw);
     }
     function imgURL(v){
-      const u=norm(v); if(!u) return "";
+      var u=norm(v); if(!u) return "";
       if(/^https?:\/\//i.test(u) || /^\/|^data:/i.test(u)) return u;
-      const base=norm(IMG_BASE); if(!base) return u;
-      return (base.endsWith('/')?base:base+'/') + u.replace(/^\/+/,"");
+      var base=norm(IMG_BASE); if(!base) return u;
+      return (base.charAt(base.length-1)==='/'?base:base+'/') + u.replace(/^\/+/,"");
     }
 
-    // Statisches Fallback-HTML entfernen (falls vorhanden)
-    Array.from(wrap.querySelectorAll('.line')).forEach(n=>n.remove());
+    // Statisches Fallback-Lineup entfernen
+    Array.prototype.forEach.call(wrap.querySelectorAll('.line'), function(n){ if(n.parentNode) n.parentNode.removeChild(n); });
 
     // Dialog
-    const dlg=document.getElementById('luModal');
-    const dlgClose=dlg?dlg.querySelector('.lu-close'):null;
-    const dlgImgWrap=dlg?dlg.querySelector('.lu-media-wrap'):null;
-    const dlgImg=dlg?dlg.querySelector('.lu-media'):null;
-    const dlgTitle=dlg?dlg.querySelector('.lu-title'):null;
-    const dlgTime=dlg?dlg.querySelector('.lu-time'):null;
-    const dlgDesc=dlg?dlg.querySelector('.lu-desc'):null;
+    var dlg=document.getElementById('luModal');
+    var dlgClose=dlg?dlg.querySelector('.lu-close'):null;
+    var dlgImgWrap=dlg?dlg.querySelector('.lu-media-wrap'):null;
+    var dlgImg=dlg?dlg.querySelector('.lu-media'):null;
+    var dlgTitle=dlg?dlg.querySelector('.lu-title'):null;
+    var dlgTime=dlg?dlg.querySelector('.lu-time'):null;
+    var dlgDesc=dlg?dlg.querySelector('.lu-desc'):null;
 
     function openModal(p){
       if(!dlg) return;
-      const title=p&&p.title||"", time=p&&p.time||"", desc=p&&p.desc||"", image=p&&p.image||"";
+      var title=p&&p.title||"", time=p&&p.time||"", desc=p&&p.desc||"", image=p&&p.image||"";
       if(dlgTitle) dlgTitle.textContent=title;
       if(dlgTime) dlgTime.textContent=time;
       if(dlgImgWrap && dlgImg){
@@ -269,150 +327,113 @@
       if(dlgDesc){
         dlgDesc.textContent="";
         if(desc){
-          const parts=desc.split(/\r?\n/);
-          parts.forEach((line,i)=>{ if(i) dlgDesc.appendChild(document.createElement('br')); dlgDesc.appendChild(document.createTextNode(line)); });
+          var parts=desc.split(/\r?\n/);
+          for(var i=0;i<parts.length;i++){
+            if(i) dlgDesc.appendChild(document.createElement('br'));
+            dlgDesc.appendChild(document.createTextNode(parts[i]));
+          }
         }
       }
       try{ dlg.showModal(); }catch(e){ dlg.setAttribute('open',''); }
-      setTimeout(()=>{ if(dlgClose) dlgClose.focus(); },0);
+      setTimeout(function(){ if(dlgClose) dlgClose.focus(); },0);
     }
     function closeModal(){ if(dlg && dlg.close) dlg.close(); if(dlg) dlg.removeAttribute('open'); }
     if(dlgClose) dlgClose.addEventListener('click', closeModal);
     if(dlg){
-      dlg.addEventListener('cancel', e=>{ e.preventDefault(); closeModal(); });
-      dlg.addEventListener('click', e=>{
-        const r=dlg.getBoundingClientRect();
+      dlg.addEventListener('cancel', function(e){ e.preventDefault(); closeModal(); });
+      dlg.addEventListener('click', function(e){
+        var r=dlg.getBoundingClientRect();
         if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom) closeModal();
       });
     }
 
     function renderDayBlock(dayLabel, acts){
-      const day=document.createElement('div'); day.className='line';
-      const tag=document.createElement('div'); tag.className='lineup-daytag'; tag.textContent=dayLabel; day.appendChild(tag);
-      const ul=document.createElement('ul'); ul.className='acts'; ul.setAttribute('aria-label','Line-up '+dayLabel);
-      acts.forEach(a=>{
-        const li=document.createElement('li');
-        const btn=document.createElement('button'); btn.type='button'; btn.className='lu-act'; btn.setAttribute('aria-haspopup','dialog');
+      var day=document.createElement('div'); day.className='line';
+      var tag=document.createElement('div'); tag.className='lineup-daytag'; tag.textContent=dayLabel; day.appendChild(tag);
+      var ul=document.createElement('ul'); ul.className='acts'; ul.setAttribute('aria-label','Line-up '+dayLabel);
+      acts.forEach(function(a){
+        var li=document.createElement('li');
+        var btn=document.createElement('button'); btn.type='button'; btn.className='lu-act'; btn.setAttribute('aria-haspopup','dialog');
         btn.textContent=a.artist||"–";
-        btn.addEventListener('click', ()=>openModal({ title:a.artist, time:fmtTime(a.start,a.end), desc:a.description, image:a.image }));
+        btn.addEventListener('click', function(){ openModal({ title:a.artist, time:fmtTime(a.start,a.end), desc:a.description, image:a.image }); });
         li.appendChild(btn); ul.appendChild(li);
       });
-      day.appendChild(ul); return day;
+      day.appendChild(ul);
+      return day;
     }
 
     fetch(CSV_URL,{cache:'no-store'})
-      .then(res=>res.text())
-      .then(text=>{
-        const parsed=Papa.parse(text,{header:true,skipEmptyLines:true});
-        const rows=(parsed.data||[]).filter(r=>Object.keys(r).some(k=>norm(r[k])));
+      .then(function(res){ return res.text(); })
+      .then(function(text){
+        var parsed=Papa.parse(text,{header:true,skipEmptyLines:true});
+        var rows=(parsed.data||[]).filter(function(r){ return Object.keys(r).some(function(k){ return norm(r[k]); }); });
         if(!rows.length) return;
 
-        const DAY=["day","tag","wochentag","datum"],
-              START=["start","startzeit","beginn"],
-              END=["end","ende","endzeit"],
-              ART=["artist","band","name","bandname"],
-              DESC=["description","beschreibung","text","info"],
-              IMG=["image","bild","bildurl","foto","image_url","url"];
+        var DAY=["day","tag","wochentag","datum"], START=["start","startzeit","beginn"], END=["end","ende","endzeit"], ART=["artist","band","name","bandname"], DESC=["description","beschreibung","text","info"], IMG=["image","bild","bildurl","foto","image_url","url"];
 
-        const groups=[], byKey={};
-        rows.forEach(row=>{
-          const artist=pick(row,ART); if(!artist) return;
-          const dayRaw=pick(row,DAY)||"",
-                start=pick(row,START),
-                end=pick(row,END),
-                description=pick(row,DESC),
-                image=imgURL(pick(row,IMG));
-          const key=lc(dayRaw)||"lineup";
-          if(!byKey[key]){ const label=normalizeDayLabel(dayRaw||"Line-up"); byKey[key]={key,label,items:[]}; groups.push(byKey[key]); }
-          byKey[key].items.push({ artist, start, end, description, image, t:timeToMinutes(start) });
+        var groups=[], byKey={};
+        rows.forEach(function(row){
+          var artist=pick(row,ART); if(!artist) return;
+          var dayRaw=pick(row,DAY)||"", start=pick(row,START), end=pick(row,END), description=pick(row,DESC), image=imgURL(pick(row,IMG));
+          var key=lc(dayRaw)||"lineup";
+          if(!byKey[key]){ var label=normalizeDayLabel(dayRaw||"Line-up"); byKey[key]={key:key,label:label,items:[]}; groups.push(byKey[key]); }
+          byKey[key].items.push({ artist:artist, start:start, end:end, description:description, image:image, t:timeToMinutes(start) });
         });
 
-        groups.forEach(g=>g.items.sort((a,b)=>a.t-b.t));
-        groups.forEach(g=>root.appendChild(renderDayBlock(g.label,g.items)));
+        groups.forEach(function(g){ g.items.sort(function(a,b){ return a.t-b.t; }); });
+        groups.forEach(function(g){ root.appendChild(renderDayBlock(g.label,g.items)); });
 
-        // Nach dem Rendern: Dots als Overlays setzen
-        setTimeout(()=>{ window.dispatchEvent(new Event('resize')); },0);
+        // Nach dem Rendern: Punkte am Zeilenanfang ausblenden
+        updateLineupSeparators();
+        requestAnimationFrame(updateLineupSeparators);
       })
-      .catch(err=>console.error(err));
+      .catch(function(err){ console.error(err); });
   })();
   </script>
 
-  <!-- JS: Punkte als Overlays (richtige Größe, oberhalb, keine Umbrüche) -->
+  <!-- JS: Line-up – Punkt am Zeilenanfang verbergen (robust) -->
   <script>
-  (function(){
-    function clearLayer(ul){
-      const layer = ul.querySelector('.lu-dots-layer');
-      if(layer) layer.remove();
-      if(ul.dataset.ulPos){ ul.style.position = ul.dataset.ulPos; delete ul.dataset.ulPos; }
-    }
+  (function () {
+    function updateLineupSeparators() {
+      document.querySelectorAll('.lineup .acts').forEach(function(ul){
+        var items = Array.prototype.slice.call(ul.children);
+        if(!items.length) return;
 
-    function placeDotsOnList(ul){
-      // CSS-Punkte deaktivieren
-      ul.classList.add('js-seps');
+        // Reset
+        items.forEach(function(li){ li.classList.remove('row-start'); });
 
-      clearLayer(ul);
+        // Toleranzen
+        var TOL_Y = 12; // px – Abweichung in Y, die noch "gleiche Zeile" ist
+        var TOL_X = 6;  // px – absichernd (bei Wrap beginnt Zeile wieder weiter links)
 
-      // UL für absolute Positionierung vorbereiten
-      const pos = getComputedStyle(ul).position;
-      if(pos === 'static'){ ul.dataset.ulPos = 'static'; ul.style.position = 'relative'; }
+        // Erste immer Zeilenanfang
+        var prevRect = items[0].getBoundingClientRect();
+        items[0].classList.add('row-start');
 
-      // Layer anlegen (oberhalb der Schrift)
-      const layer = document.createElement('span');
-      layer.className = 'lu-dots-layer';
-      Object.assign(layer.style, {
-        position: 'absolute',
-        inset: '0',
-        pointerEvents: 'none',
-        zIndex: '5'
+        for(var i=1;i<items.length;i++){
+          var r = items[i].getBoundingClientRect();
+          var newRow = (Math.abs(r.top - prevRect.top) > TOL_Y) || (r.left + TOL_X < prevRect.left);
+          if(newRow){
+            items[i].classList.add('row-start');
+            // neue Referenzbasis für die nächste Zeile
+            prevRect = r;
+          } else {
+            // selbe Zeile – Referenz schrittweise fortführen
+            prevRect = r;
+          }
+        }
       });
-      ul.appendChild(layer);
-
-      const items = Array.from(ul.children);
-      if(items.length < 2) return;
-
-      const TOL = 3; // px, gleiche Zeile
-      const ulRect = ul.getBoundingClientRect();
-
-      for(let i=0;i<items.length-1;i++){
-        const a = items[i], b = items[i+1];
-        const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
-        const sameRow = Math.abs(ra.top - rb.top) <= TOL;
-        if(!sameRow) continue;
-
-        const dot = document.createElement('span');
-        dot.textContent = '•';
-
-        // Größe exakt wie der Text der Band
-        const fs = getComputedStyle(a).fontSize;
-        dot.style.fontSize = fs;
-
-        Object.assign(dot.style, {
-          position: 'absolute',
-          left: (ra.right - ulRect.left + 6) + 'px', // kleiner Abstand
-          top:  ((ra.top + ra.height/2) - ulRect.top) + 'px',
-          transform: 'translateY(-50%)',
-          color: 'var(--highlight)',
-          lineHeight: '1',
-          userSelect: 'none'
-        });
-
-        layer.appendChild(dot);
-      }
     }
 
-    function updateAll(){
-      document.querySelectorAll('.lineup .acts').forEach(placeDotsOnList);
-    }
+    // Events
+    var debounce = (function(){ var id; return function(){ clearTimeout(id); id=setTimeout(updateLineupSeparators, 100); }; })();
+    window.addEventListener('load', updateLineupSeparators);
+    window.addEventListener('resize', debounce);
+    window.addEventListener('orientationchange', debounce);
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(function(){ updateLineupSeparators(); requestAnimationFrame(updateLineupSeparators); }); }
 
-    // Reagiert auf Größe/Wrap-Änderungen
-    const deb = (()=>{ let id; return ()=>{ clearTimeout(id); id = setTimeout(updateAll, 80); }; })();
-    window.addEventListener('load', updateAll);
-    window.addEventListener('resize', deb);
-    window.addEventListener('orientationchange', deb);
-    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(updateAll); }
-
-    // Falls später Inhalte dazukommen (CSV), einmal nachträglich
-    setTimeout(updateAll, 500);
+    // Exponieren für CSV-Callback
+    window.updateLineupSeparators = updateLineupSeparators;
   })();
   </script>
 </body>
