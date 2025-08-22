@@ -14,67 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap" rel="stylesheet">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="../styles.css?v=simple-banner" />
-  <style>
-    /* Zusätzliches CSS nur für das Line-Up mit roten Punkten */
-    .lineup .acts {
-      list-style: none;
-      margin: 0 0 1.4rem 0;
-      padding: 0;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-      row-gap: 0.6em;
-      text-align: center;
-    }
-    
-    .lineup .acts li {
-      font-family: "Rubik Dirt", "Montserrat", sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      line-height: 0.9;
-      color: var(--primary);
-      font-size: clamp(1.8rem, 5vw, 3rem);
-      padding: 0 0.12em;
-      position: relative;
-    }
-    
-    .lineup .acts li:not(:last-child)::after {
-      content: "•";
-      display: inline-block;
-      margin-left: 0.4em;
-      color: #FC411F;
-      opacity: 0.95;
-    }
-    
-    /* Für mobile Ansicht - Punkte nur zwischen Elementen in derselben Zeile */
-    @media (max-width: 768px) {
-      .lineup .acts {
-        justify-content: flex-start;
-        padding: 0 1rem;
-      }
-      
-      .lineup .acts li {
-        font-size: clamp(1.6rem, 4.5vw, 2.2rem);
-      }
-      
-      .lineup .acts li::after {
-        content: none;
-      }
-      
-      .lineup .acts li:not(:last-child) {
-        margin-right: 0.8em;
-      }
-      
-      .lineup .acts li:not(:last-child)::after {
-        content: "•";
-        position: absolute;
-        right: -0.6em;
-        color: #FC411F;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/styles.css?v=simple-banner" />
 </head>
 <body class="fete-page">
 
@@ -150,7 +90,7 @@
 
             <div class="line">
               <div class="lineup-daytag">FR. 29. AUGUST</div>
-              <ul class="acts" aria-label="Line-up Freitag, 29. August">
+              <ul class="acts lineup-fixed" aria-label="Line-up Freitag, 29. August">
                 <li>Futari</li>
                 <li>Die Brehmes'</li>
                 <li>Kleiner Held</li>
@@ -162,7 +102,7 @@
 
             <div class="line">
               <div class="lineup-daytag">SA. 30. AUGUST</div>
-              <ul class="acts" aria-label="Line-up Samstag, 30. August">
+              <ul class="acts lineup-fixed" aria-label="Line-up Samstag, 30. August">
                 <li>Kindertheater</li>
                 <li>Kinderchor</li>
                 <li>Christin Rohr</li>
@@ -362,7 +302,7 @@
   <script>
   (function () {
     function updateLineupSeparators() {
-      document.querySelectorAll('.lineup .acts').forEach(ul => {
+      document.querySelectorAll('.lineup-fixed').forEach(ul => {
         const items = Array.from(ul.children);
         let lastTop = null;
         items.forEach((li, idx) => {
