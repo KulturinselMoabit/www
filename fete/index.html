@@ -13,7 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap" rel="stylesheet">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="../styles.css?v=simple-banner" />
+  <link rel="stylesheet" href="/styles.css?v=simple-banner" />
 </head>
 <body class="fete-page">
 
@@ -176,7 +176,7 @@
         function cleanup(){ v.removeEventListener('loadedmetadata',ok); v.removeEventListener('error',err); }
         v.addEventListener('loadedmetadata', ok);
         v.addEventListener('error', err);
-        v.src = url;
+        v.src=url;
       });
     }
     function probe(n){
@@ -303,7 +303,7 @@
       return (base.charAt(base.length-1)==='/'?base:base+'/') + u.replace(/^\/+/,"");
     }
 
-    // Statisches Fallback-Lineup entfernen
+    // statische Fallback-Blöcke entfernen (falls vorhanden)
     Array.prototype.forEach.call(wrap.querySelectorAll('.line'), function(n){ if(n.parentNode) n.parentNode.removeChild(n); });
 
     // Dialog
@@ -358,23 +358,33 @@
         btn.addEventListener('click', function(){ openModal({ title:a.artist, time:fmtTime(a.start,a.end), desc:a.description, image:a.image }); });
         li.appendChild(btn); ul.appendChild(li);
       });
-      day.appendChild(ul);
-      return day;
+      day.appendChild(ul); return day;
     }
 
     fetch(CSV_URL,{cache:'no-store'})
       .then(function(res){ return res.text(); })
       .then(function(text){
         var parsed=Papa.parse(text,{header:true,skipEmptyLines:true});
-        var rows=(parsed.data||[]).filter(function(r){ return Object.keys(r).some(function(k){ return norm(r[k]); }); });
+        var rows=(parsed.data||[]).filter(function(r){
+          return Object.keys(r).some(function(k){ return norm(r[k]); });
+        });
         if(!rows.length) return;
 
-        var DAY=["day","tag","wochentag","datum"], START=["start","startzeit","beginn"], END=["end","ende","endzeit"], ART=["artist","band","name","bandname"], DESC=["description","beschreibung","text","info"], IMG=["image","bild","bildurl","foto","image_url","url"];
+        var DAY=["day","tag","wochentag","datum"],
+            START=["start","startzeit","beginn"],
+            END=["end","ende","endzeit"],
+            ART=["artist","band","name","bandname"],
+            DESC=["description","beschreibung","text","info"],
+            IMG=["image","bild","bildurl","foto","image_url","url"];
 
         var groups=[], byKey={};
         rows.forEach(function(row){
           var artist=pick(row,ART); if(!artist) return;
-          var dayRaw=pick(row,DAY)||"", start=pick(row,START), end=pick(row,END), description=pick(row,DESC), image=imgURL(pick(row,IMG));
+          var dayRaw=pick(row,DAY)||"",
+              start=pick(row,START),
+              end=pick(row,END),
+              description=pick(row,DESC),
+              image=imgURL(pick(row,IMG));
           var key=lc(dayRaw)||"lineup";
           if(!byKey[key]){ var label=normalizeDayLabel(dayRaw||"Line-up"); byKey[key]={key:key,label:label,items:[]}; groups.push(byKey[key]); }
           byKey[key].items.push({ artist:artist, start:start, end:end, description:description, image:image, t:timeToMinutes(start) });
@@ -383,57 +393,87 @@
         groups.forEach(function(g){ g.items.sort(function(a,b){ return a.t-b.t; }); });
         groups.forEach(function(g){ root.appendChild(renderDayBlock(g.label,g.items)); });
 
-        // Nach dem Rendern: Punkte am Zeilenanfang ausblenden
-        updateLineupSeparators();
-        requestAnimationFrame(updateLineupSeparators);
+        // Nach CSV-Render: Zeilenanfänge ermitteln (erst mit fertigem Layout)
+        if (window.scheduleLineupMeasure) window.scheduleLineupMeasure();
       })
       .catch(function(err){ console.error(err); });
   })();
   </script>
 
-  <!-- JS: Line-up – Punkt am Zeilenanfang verbergen (robust) -->
+  <!-- JS: Zeilenanfangserkennung (stabil via offsetTop) -->
   <script>
-  (function () {
-    function updateLineupSeparators() {
-      document.querySelectorAll('.lineup .acts').forEach(function(ul){
-        var items = Array.prototype.slice.call(ul.children);
-        if(!items.length) return;
+  (function(){
+    var ro = null;    // ResizeObserver
+    var mo = null;    // MutationObserver
+    var rafId = 0;
+    var timeoutId = 0;
 
-        // Reset
-        items.forEach(function(li){ li.classList.remove('row-start'); });
+    function computeForList(ul){
+      var items = Array.prototype.slice.call(ul.children);
+      if(!items.length) return;
 
-        // Toleranzen
-        var TOL_Y = 12; // px – Abweichung in Y, die noch "gleiche Zeile" ist
-        var TOL_X = 6;  // px – absichernd (bei Wrap beginnt Zeile wieder weiter links)
+      // Reset
+      items.forEach(function(li){ li.classList.remove('row-start'); });
 
-        // Erste immer Zeilenanfang
-        var prevRect = items[0].getBoundingClientRect();
-        items[0].classList.add('row-start');
-
-        for(var i=1;i<items.length;i++){
-          var r = items[i].getBoundingClientRect();
-          var newRow = (Math.abs(r.top - prevRect.top) > TOL_Y) || (r.left + TOL_X < prevRect.left);
-          if(newRow){
-            items[i].classList.add('row-start');
-            // neue Referenzbasis für die nächste Zeile
-            prevRect = r;
-          } else {
-            // selbe Zeile – Referenz schrittweise fortführen
-            prevRect = r;
-          }
+      var lastTop = null;
+      for(var i=0;i<items.length;i++){
+        var t = items[i].offsetTop; // integer, stabil
+        if (i===0 || lastTop===null || t !== lastTop){
+          items[i].classList.add('row-start');
+          lastTop = t;
         }
+      }
+    }
+
+    function updateAll(){
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(function(){
+        // zweiter Frame: nach Webfont-Reflow wirklich stabil
+        cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(function(){
+          document.querySelectorAll('.lineup .acts').forEach(computeForList);
+        });
       });
     }
 
-    // Events
-    var debounce = (function(){ var id; return function(){ clearTimeout(id); id=setTimeout(updateLineupSeparators, 100); }; })();
-    window.addEventListener('load', updateLineupSeparators);
-    window.addEventListener('resize', debounce);
-    window.addEventListener('orientationchange', debounce);
-    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(function(){ updateLineupSeparators(); requestAnimationFrame(updateLineupSeparators); }); }
+    // öffentlich, damit CSV-Renderer triggern kann
+    window.scheduleLineupMeasure = function(){
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(updateAll, 0);
+    };
 
-    // Exponieren für CSV-Callback
-    window.updateLineupSeparators = updateLineupSeparators;
+    // bei Größe/Orientierung neu messen
+    var deb = (function(){ var id; return function(){ clearTimeout(id); id=setTimeout(updateAll, 80); }; })();
+    window.addEventListener('resize', deb);
+    window.addEventListener('orientationchange', deb);
+    window.addEventListener('load', updateAll);
+
+    // nach Font-Load messen
+    if (document.fonts) {
+      document.fonts.ready.then(updateAll).catch(function(){});
+      // manche Browser feuern Events – mitnehmen, schadet nicht
+      if (document.fonts.addEventListener) {
+        document.fonts.addEventListener('loadingdone', updateAll);
+      }
+    }
+
+    // auf DOM-Änderungen innerhalb des Lineup reagieren (CSV-Render)
+    var root = document.querySelector('.lineup .lu-root');
+    if (root && window.MutationObserver) {
+      mo = new MutationObserver(function(){ window.scheduleLineupMeasure(); });
+      mo.observe(root, {childList:true, subtree:true});
+    }
+
+    // Größenänderungen einzelner ULs beobachten (z.B. wenn Zeilen umbrechen)
+    if (window.ResizeObserver) {
+      ro = new ResizeObserver(function(){ window.scheduleLineupMeasure(); });
+      // sobald ULs existieren, anhängen
+      var attach = function(){
+        document.querySelectorAll('.lineup .acts').forEach(function(ul){ ro.observe(ul); });
+      };
+      window.addEventListener('load', attach);
+      setTimeout(attach, 500);
+    }
   })();
   </script>
 </body>
