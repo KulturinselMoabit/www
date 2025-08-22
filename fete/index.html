@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap" rel="stylesheet">
 
-  <!-- CSS -->
+  <!-- CSS (unverändert) -->
   <link rel="stylesheet" href="../styles.css?v=simple-banner" />
 </head>
 <body class="fete-page">
@@ -20,13 +20,9 @@
   <!-- HEADER -->
   <header id="site-header">
     <div class="container header-inner">
-      <div class="logo">
-        <img src="/logo.svg" alt="Logo Kulturinsel Moabit" />
-      </div>
+      <div class="logo"><img src="/logo.svg" alt="Logo Kulturinsel Moabit" /></div>
       <nav class="site-nav">
-        <button class="menu-toggle" aria-label="Menü öffnen / schließen">
-          <span></span><span></span><span></span>
-        </button>
+        <button class="menu-toggle" aria-label="Menü öffnen / schließen"><span></span><span></span><span></span></button>
         <ul>
           <li><a href="/">Startseite</a></li>
           <li><a href="/fete/" class="active">Fête du Seeee</a></li>
@@ -48,26 +44,22 @@
           <img class="fete-banner-img" src="fete-banner.svg" alt="Fête du Seeee – Banner" />
         </section>
 
-        <!-- Meta-Zeile -->
+        <!-- Meta -->
         <div class="fete-meta">
           <span>Strandbad Tegelsee</span>
           <span class="sep">•</span>
           <span>29. &amp; 30. August 2025</span>
         </div>
 
-        <!-- Intro-Text -->
+        <!-- Intro -->
         <section class="info-block">
-          <p>
-            Dieses Jahr wird unsere Fête du Seeee noch bunter und größer:
+          <p>Dieses Jahr wird unsere Fête du Seeee noch bunter und größer:
             Wir feiern an zwei Tagen auf gleich <strong>zwei Bühnen</strong> im wunderschönen
             Strandbad Tegelsee! Freut euch auf ein vielseitiges Programm aus Musik, Theater und Kunst,
-            das von ehrenamtlichen Künstler*innen für euch gestaltet wird.
-          </p>
-          <p>
-            Genießt tagsüber Kultur-Highlights und bunte Aktionen für Groß und Klein direkt am Wasser,
+            das von ehrenamtlichen Künstler*innen für euch gestaltet wird.</p>
+          <p>Genießt tagsüber Kultur-Highlights und bunte Aktionen für Groß und Klein direkt am Wasser,
             und lasst euch abends von mitreißenden Konzerten und Performances auf beiden Bühnen mitreißen.
-            Bei den unterschiedlichsten Genres ist für jeden Geschmack etwas dabei!
-          </p>
+            Bei den unterschiedlichsten Genres ist für jeden Geschmack etwas dabei!</p>
         </section>
 
         <!-- SLIDESHOW -->
@@ -77,24 +69,20 @@
             <button class="fete-control next" aria-label="Nächstes">›</button>
             <div class="fete-dots" role="tablist" aria-label="Slideshow-Navigation"></div>
           </div>
-          <noscript>
-            <img src="1.jpg" alt="Festivalbild 1" style="width:100%;height:auto;border-radius:8px;display:block;margin-top:.5rem;">
-          </noscript>
+          <noscript><img src="1.jpg" alt="Festivalbild 1" style="width:100%;height:auto;border-radius:8px;display:block;margin-top:.5rem;"></noscript>
         </section>
 
-        <!-- ===== LINE-UP ===== -->
-        <section class="lineup">
+        <!-- ===== LINE-UP (CSV) ===== -->
+        <section class="lineup" id="lineup">
           <div class="lineup-wrap">
             <div class="lineup-heading">Line-Up</div>
             <div class="lu-root" aria-live="polite"></div>
           </div>
 
-          <!-- Modal -->
+          <!-- Details-Dialog -->
           <dialog id="luModal" aria-label="Details">
             <button type="button" class="lu-close" aria-label="Schließen">×</button>
-            <div class="lu-media-wrap" hidden>
-              <img class="lu-media" alt="" loading="lazy" />
-            </div>
+            <div class="lu-media-wrap" hidden><img class="lu-media" alt="" loading="lazy" /></div>
             <h3 class="lu-title"></h3>
             <div class="lu-time"></div>
             <div class="lu-desc"></div>
@@ -111,10 +99,8 @@
             <li>Ermäßigt: 4 €</li>
             <li>Ab 18 Uhr: 2,50 €</li>
           </ul>
-          <p>
-            Kommt vorbei, bringt eure Freund*innen mit und lasst uns gemeinsam am
-            Tegeler See feiern – wir freuen uns auf euch!
-          </p>
+          <p>Kommt vorbei, bringt eure Freund*innen mit und lasst uns gemeinsam am
+            Tegeler See feiern – wir freuen uns auf euch!</p>
         </section>
 
       </div>
@@ -124,11 +110,7 @@
   <!-- FOOTER -->
   <footer id="site-footer">
     <div class="container footer-inner">
-      <p>
-        <a href="/impressum.html">Impressum</a> |
-        <a href="/kontakt.html">Kontakt</a> |
-        <a href="/datenschutz.html">Datenschutz</a>
-      </p>
+      <p><a href="/impressum.html">Impressum</a> | <a href="/kontakt.html">Kontakt</a> | <a href="/datenschutz.html">Datenschutz</a></p>
       <p>© 2025 Kulturinsel Moabit – alle Rechte vorbehalten</p>
     </div>
   </footer>
@@ -136,9 +118,9 @@
   <!-- JS: Burger-Menü -->
   <script>
     (function(){
-      var btn = document.querySelector('.menu-toggle');
-      var nav = document.querySelector('.site-nav ul');
-      if (btn && nav) {
+      var btn=document.querySelector('.menu-toggle');
+      var nav=document.querySelector('.site-nav ul');
+      if(btn && nav){
         btn.addEventListener('click', function(){
           nav.classList.toggle('open');
           btn.classList.toggle('open');
@@ -147,80 +129,79 @@
     })();
   </script>
 
-  <!-- JS: Slideshow (robust, JPG/MP4 1–9) -->
+  <!-- JS: Slideshow (unverändert) -->
   <script>
   (function(){
-    var slider = document.getElementById('feteSlider');
-    if (!slider) return;
+    var slider=document.getElementById('feteSlider');
+    if(!slider) return;
 
-    var prevBtn = slider.querySelector('.fete-control.prev');
-    var nextBtn = slider.querySelector('.fete-control.next');
-    var dotsWrap = slider.querySelector('.fete-dots');
+    var prevBtn=slider.querySelector('.fete-control.prev');
+    var nextBtn=slider.querySelector('.fete-control.next');
+    var dotsWrap=slider.querySelector('.fete-dots');
 
-    function mk(tag, cls, txt){
-      var el = document.createElement(tag);
-      if (cls) el.className = cls;
-      if (txt != null) el.textContent = txt;
+    function mk(tag,cls,txt){
+      var el=document.createElement(tag);
+      if(cls) el.className=cls;
+      if(txt!=null) el.textContent=txt;
       return el;
     }
-    if (!prevBtn){ prevBtn = mk('button','fete-control prev','‹'); prevBtn.setAttribute('aria-label','Vorheriges'); slider.appendChild(prevBtn); }
-    if (!nextBtn){ nextBtn = mk('button','fete-control next','›'); nextBtn.setAttribute('aria-label','Nächstes'); slider.appendChild(nextBtn); }
-    if (!dotsWrap){ dotsWrap = mk('div','fete-dots'); dotsWrap.setAttribute('role','tablist'); dotsWrap.setAttribute('aria-label','Slideshow-Navigation'); slider.appendChild(dotsWrap); }
+    if(!prevBtn){ prevBtn=mk('button','fete-control prev','‹'); prevBtn.setAttribute('aria-label','Vorheriges'); slider.appendChild(prevBtn); }
+    if(!nextBtn){ nextBtn=mk('button','fete-control next','›'); nextBtn.setAttribute('aria-label','Nächstes'); slider.appendChild(nextBtn); }
+    if(!dotsWrap){ dotsWrap=mk('div','fete-dots'); dotsWrap.setAttribute('role','tablist'); dotsWrap.setAttribute('aria-label','Slideshow-Navigation'); slider.appendChild(dotsWrap); }
 
     function folderPath(){
-      var p = location.pathname;
-      if (p.endsWith('/')) return p;
-      if (/\/index\.html?$/i.test(p)) return p.replace(/index\.html?$/i,'');
-      if (p.includes('.')) return p.replace(/[^/]+$/, '');
-      return p + '/';
+      var p=location.pathname;
+      if(p.slice(-1)==='/') return p;
+      if(/\/index\.html?$/i.test(p)) return p.replace(/index\.html?$/i,'');
+      if(p.indexOf('.')>-1) return p.replace(/[^/]+$/,'');
+      return p+'/';
     }
-    var base = location.origin + folderPath();
+    var base=location.origin+folderPath();
 
     function loadImage(url){
       return new Promise(function(resolve){
-        var img = new Image();
-        img.onload  = function(){ resolve({ok:true, node:img}); };
-        img.onerror = function(){ resolve({ok:false}); };
-        img.decoding = 'async';
-        img.src = url;
+        var img=new Image();
+        img.onload=function(){ resolve({ok:true,node:img}); };
+        img.onerror=function(){ resolve({ok:false}); };
+        img.decoding='async';
+        img.src=url;
       });
     }
     function loadVideo(url){
       return new Promise(function(resolve){
-        var v = document.createElement('video');
+        var v=document.createElement('video');
         v.preload='metadata'; v.muted=true; v.playsInline=true; v.setAttribute('playsinline',''); v.loop=true;
-        function ok(){ cleanup(); resolve({ok:true, node:v}); }
+        function ok(){ cleanup(); resolve({ok:true,node:v}); }
         function err(){ cleanup(); resolve({ok:false}); }
-        function cleanup(){ v.removeEventListener('loadedmetadata', ok); v.removeEventListener('error', err); }
+        function cleanup(){ v.removeEventListener('loadedmetadata',ok); v.removeEventListener('error',err); }
         v.addEventListener('loadedmetadata', ok);
         v.addEventListener('error', err);
         v.src = url;
       });
     }
     function probe(n){
-      var jpg = base + n + '.jpg';
+      var jpg=base+n+'.jpg';
       return loadImage(jpg).then(function(r){
-        if (r.ok){ r.node.alt = 'Festivalbild ' + n; return {idx:n, node:r.node}; }
-        var mp4 = base + n + '.mp4';
-        return loadVideo(mp4).then(function(r2){ return r2.ok ? {idx:n, node:r2.node} : null; });
+        if(r.ok){ r.node.alt='Festivalbild '+n; return {idx:n,node:r.node}; }
+        var mp4=base+n+'.mp4';
+        return loadVideo(mp4).then(function(r2){ return r2.ok ? {idx:n,node:r2.node} : null; });
       });
     }
 
     (function init(){
-      Promise.all(Array.from({length: 9}, function(_,i){return probe(i+1);})).then(function(results){
-        var items = results.filter(Boolean).sort(function(a,b){return a.idx - b.idx;});
-        if (!items.length) return;
+      Promise.all(Array.from({length:9},function(_,i){return probe(i+1);})).then(function(results){
+        var items=results.filter(Boolean).sort(function(a,b){return a.idx-b.idx;});
+        if(!items.length) return;
 
-        var slides = [], dots = [];
-        function addSlide(node, i){
-          var wrap = mk('div','fete-slide');
+        var slides=[], dots=[];
+        function addSlide(node,i){
+          var wrap=mk('div','fete-slide');
           wrap.setAttribute('data-index', i);
           wrap.setAttribute('aria-hidden','true');
           wrap.appendChild(node);
           slider.insertBefore(wrap, dotsWrap);
 
-          var dot = mk('button','fete-dot'); dot.type='button';
-          dot.setAttribute('aria-label','Slide '+(i+1));
+          var dot=mk('button','fete-dot'); dot.type='button'; dot.setAttribute('aria-label','Slide '+(i+1));
           dotsWrap.appendChild(dot);
 
           slides.push(wrap); dots.push(dot);
@@ -231,43 +212,43 @@
         slider.appendChild(nextBtn);
         slider.appendChild(dotsWrap);
 
-        var current = 0;
+        var current=0;
         function show(i){
-          current = (i + slides.length) % slides.length;
-          slides.forEach(function(el, idx){
-            var active = idx === current;
-            el.classList.toggle('active', active);
-            el.setAttribute('aria-hidden', active ? 'false' : 'true');
-            var v = el.querySelector('video');
-            if (v){ active ? v.play().catch(function(){}) : v.pause(); }
+          current=(i+slides.length)%slides.length;
+          slides.forEach(function(el,idx){
+            var active=idx===current;
+            el.classList.toggle('active',active);
+            el.setAttribute('aria-hidden',active?'false':'true');
+            var v=el.querySelector('video');
+            if(v){ active ? v.play().catch(function(){}) : v.pause(); }
           });
-          dots.forEach(function(d, idx){ d.classList.toggle('active', idx === current); });
+          dots.forEach(function(d,idx){ d.classList.toggle('active', idx===current); });
         }
 
-        prevBtn.addEventListener('click', function(){ show(current - 1); });
-        nextBtn.addEventListener('click', function(){ show(current + 1); });
+        prevBtn.addEventListener('click', function(){ show(current-1); });
+        nextBtn.addEventListener('click', function(){ show(current+1); });
 
         slider.setAttribute('tabindex','0');
         slider.addEventListener('keydown', function(e){
-          if (e.key === 'ArrowLeft')  show(current - 1);
-          if (e.key === 'ArrowRight') show(current + 1);
+          if(e.key==='ArrowLeft') show(current-1);
+          if(e.key==='ArrowRight') show(current+1);
         });
 
         var sx=null;
-        slider.addEventListener('touchstart', function(e){ sx = e.touches[0].clientX; }, {passive:true});
+        slider.addEventListener('touchstart', function(e){ sx=e.touches[0].clientX; }, {passive:true});
         slider.addEventListener('touchend',   function(e){
-          if (sx==null) return;
-          var dx = e.changedTouches[0].clientX - sx;
-          if (Math.abs(dx) > 40) (dx < 0 ? show(current + 1) : show(current - 1));
-          sx = null;
+          if(sx==null) return;
+          var dx=e.changedTouches[0].clientX - sx;
+          if(Math.abs(dx)>40) (dx<0?show(current+1):show(current-1));
+          sx=null;
         }, {passive:true});
 
         show(0);
 
-        var timer = null, hover = false;
+        var timer=null, hover=false;
         function next(){ nextBtn.click(); }
-        function start(){ if (!timer && slides.length > 1) timer = setInterval(function(){ if (!hover && !document.hidden) next(); }, 5000); }
-        function stop(){ clearInterval(timer); timer = null; }
+        function start(){ if(!timer && slides.length>1) timer=setInterval(function(){ if(!hover && !document.hidden) next(); }, 5000); }
+        function stop(){ clearInterval(timer); timer=null; }
         slider.addEventListener('mouseenter',function(){ hover=true; });
         slider.addEventListener('mouseleave',function(){ hover=false; });
         slider.addEventListener('touchstart', function(){ hover=true; }, {passive:true});
@@ -285,25 +266,25 @@
   <!-- CSV → Line-up Renderer -->
   <script>
   (function(){
-    var CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRkYgQhBk53GOGABV_qzv3ZqjgSfR61ZH9_fX-uejRTUOQ4EtAgARUXXIayqaPKWRr5hBRMCH219-_j/pub?output=csv";
-    var IMG_BASE = "";
+    var CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vRkYgQhBk53GOGABV_qzv3ZqjgSfR61ZH9_fX-uejRTUOQ4EtAgARUXXIayqaPKWRr5hBRMCH219-_j/pub?output=csv";
+    var IMG_BASE="";
 
-    var wrap = document.querySelector('.lineup .lineup-wrap');
-    var root = document.querySelector('.lineup .lu-root');
-    if (!wrap || !root) return;
+    var wrap=document.querySelector('.lineup .lineup-wrap');
+    var root=document.querySelector('.lineup .lu-root');
+    if(!wrap||!root) return;
 
-    function norm(s){ return (s==null?"":String(s)).trim(); }
-    function lc(s){ return norm(s).toLowerCase(); }
-    function pick(obj, keys){
-      var map = {}; Object.keys(obj||{}).forEach(function(k){ map[lc(k)] = obj[k]; });
-      for (var i=0;i<keys.length;i++){ var kk=lc(keys[i]); if(map.hasOwnProperty(kk)) return norm(map[kk]); }
-      var want = keys.map(function(k){return lc(k);});
-      for (var k in map){ if(!map.hasOwnProperty(k)) continue; for (var j=0;j<want.length;j++){ if(k.indexOf(want[j])!==-1) return norm(map[k]); } }
+    function norm(s){return (s==null?"":String(s)).trim();}
+    function lc(s){return norm(s).toLowerCase();}
+    function pick(obj,keys){
+      var map={}; Object.keys(obj||{}).forEach(function(k){ map[lc(k)]=obj[k]; });
+      for(var i=0;i<keys.length;i++){ var kk=lc(keys[i]); if(map.hasOwnProperty(kk)) return norm(map[kk]); }
+      var want=keys.map(function(k){return lc(k);});
+      for(var k in map){ if(!map.hasOwnProperty(k)) continue; for(var j=0;j<want.length;j++){ if(k.indexOf(want[j])!==-1) return norm(map[k]); } }
       return "";
     }
     function timeToMinutes(str){
-      var s = lc(str).replace(/[^\d:.,-]/g,"").replace(",",":").replace(".",":");
-      var m = s.match(/(\d{1,2})[:.]?(\d{2})?/); if(!m) return Number.POSITIVE_INFINITY;
+      var s=lc(str).replace(/[^\d:.,-]/g,"").replace(",",":").replace(".",":");
+      var m=s.match(/(\d{1,2})[:.]?(\d{2})?/); if(!m) return Number.POSITIVE_INFINITY;
       var h=parseInt(m[1],10), mm=m[2]?parseInt(m[2],10):0;
       if(isNaN(h)||isNaN(mm)) return Number.POSITIVE_INFINITY;
       return h*60+mm;
@@ -311,8 +292,8 @@
     function fmtTime(start,end){ var s=norm(start), e=norm(end); if(!s&&!e) return ""; if(s&&!e) return s; if(!s&&e) return e; return s+"–"+e; }
     function normalizeDayLabel(dayRaw){
       var d=lc(dayRaw); if(!d) return norm(dayRaw);
-      if (["fr","fr.","fri","fre","freitag","friday"].indexOf(d)!==-1) return "FR. 29. AUGUST";
-      if (["sa","sa.","sam","samstag","sat","saturday"].indexOf(d)!==-1) return "SA. 30. AUGUST";
+      if(["fr","fr.","fri","fre","freitag","friday"].indexOf(d)!==-1) return "FR. 29. AUGUST";
+      if(["sa","sa.","sam","samstag","sat","saturday"].indexOf(d)!==-1) return "SA. 30. AUGUST";
       return norm(dayRaw);
     }
     function imgURL(v){
@@ -322,10 +303,10 @@
       return (base.charAt(base.length-1)==='/'?base:base+'/') + u.replace(/^\/+/,"");
     }
 
-    /* statische Fallback-Blöcke entfernen */
+    // statisches Fallback-Lineup entfernen
     Array.prototype.forEach.call(wrap.querySelectorAll('.line'), function(n){ if(n.parentNode) n.parentNode.removeChild(n); });
 
-    /* Dialog */
+    // Dialog
     var dlg=document.getElementById('luModal');
     var dlgClose=dlg?dlg.querySelector('.lu-close'):null;
     var dlgImgWrap=dlg?dlg.querySelector('.lu-media-wrap'):null;
@@ -384,26 +365,15 @@
       .then(function(res){ return res.text(); })
       .then(function(text){
         var parsed=Papa.parse(text,{header:true,skipEmptyLines:true});
-        var rows=(parsed.data||[]).filter(function(r){
-          var ok=false; Object.keys(r).forEach(function(k){ if(norm(r[k])) ok=true; }); return ok;
-        });
+        var rows=(parsed.data||[]).filter(function(r){ return Object.keys(r).some(function(k){ return norm(r[k]); }); });
         if(!rows.length) return;
 
-        var groups=[], byKey={};
-        var DAY_KEYS=["day","tag","wochentag","datum"],
-            START_KEYS=["start","startzeit","beginn"],
-            END_KEYS=["end","ende","endzeit"],
-            ART_KEYS=["artist","band","name","bandname"],
-            DESC_KEYS=["description","beschreibung","text","info"],
-            IMG_KEYS=["image","bild","bildurl","foto","image_url","url"];
+        var DAY=["day","tag","wochentag","datum"], START=["start","startzeit","beginn"], END=["end","ende","endzeit"], ART=["artist","band","name","bandname"], DESC=["description","beschreibung","text","info"], IMG=["image","bild","bildurl","foto","image_url","url"];
 
+        var groups=[], byKey={};
         rows.forEach(function(row){
-          var artist=pick(row,ART_KEYS); if(!artist) return;
-          var dayRaw=pick(row,DAY_KEYS)||"",
-              start=pick(row,START_KEYS),
-              end=pick(row,END_KEYS),
-              description=pick(row,DESC_KEYS),
-              image=imgURL(pick(row,IMG_KEYS));
+          var artist=pick(row,ART); if(!artist) return;
+          var dayRaw=pick(row,DAY)||"", start=pick(row,START), end=pick(row,END), description=pick(row,DESC), image=imgURL(pick(row,IMG));
           var key=lc(dayRaw)||"lineup";
           if(!byKey[key]){ var label=normalizeDayLabel(dayRaw||"Line-up"); byKey[key]={key:key,label:label,items:[]}; groups.push(byKey[key]); }
           byKey[key].items.push({ artist:artist, start:start, end:end, description:description, image:image, t:timeToMinutes(start) });
@@ -412,59 +382,76 @@
         groups.forEach(function(g){ g.items.sort(function(a,b){ return a.t-b.t; }); });
         groups.forEach(function(g){ root.appendChild(renderDayBlock(g.label,g.items)); });
 
-        // Nach dem Rendern: Zeilenanfänge ermitteln
-        if (window.updateLineupSeparators) {
-          window.updateLineupSeparators();
-          requestAnimationFrame(window.updateLineupSeparators);
-        }
+        // nach dem Rendern: Zeilenerkennung starten
+        if(window.measureLineup){ window.measureLineup(); }
       })
       .catch(function(err){ console.error(err); });
   })();
   </script>
 
-  <!-- JS: Line-up – Zeilenanfänge stabil (offsetTop) -->
+  <!-- JS: Zeilenanfang stabil erkennen (offsetTop) + Platz ausgleichen per inline padding -->
   <script>
-  (function () {
-    function updateLineupSeparators() {
-      document.querySelectorAll('.lineup .acts').forEach(function(ul){
-        var items = Array.prototype.slice.call(ul.children);
-        if(!items.length) return;
+  (function(){
+    // Breite, die dem ausgeblendeten Punkt ungefähr entspricht (muss NICHT pixelgenau sein)
+    var PAD_COMP_EM = 0.38; // em
 
-        // reset
-        items.forEach(function(li){ li.classList.remove('row-start'); });
+    function computeForUL(ul){
+      var items = Array.prototype.slice.call(ul.children);
+      if(!items.length) return;
 
-        var lastTop = null;
-        for (var i=0;i<items.length;i++){
-          var t = items[i].offsetTop; // integer, unabhängig von Subpixeln
-          if (i === 0 || t !== lastTop) {
-            items[i].classList.add('row-start');
-            lastTop = t;
+      // Reset: Klassen und evtl. Inline-Polster entfernen
+      items.forEach(function(li){
+        li.classList.remove('row-start');
+        li.style.paddingLeft = ''; // ggf. alten Ausgleich entfernen
+      });
+
+      // 2× rAF, damit Fonts sicher im Layout sind
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          var lastTop = null;
+          for(var i=0;i<items.length;i++){
+            var li = items[i];
+            var t = li.offsetTop; // stabil (int)
+            if(i===0 || t !== lastTop){
+              li.classList.add('row-start');                   // CSS blendet Punkt aus
+              li.style.paddingLeft = PAD_COMP_EM + 'em';       // Platz kompensieren (kein Wrap-Shift)
+              lastTop = t;
+            }else{
+              // Folge-Item: keine Extra-Polsterung
+              li.style.paddingLeft = '';
+              lastTop = t;
+            }
           }
-        }
+        });
       });
     }
-    window.updateLineupSeparators = function(){
-      // erst nach Fonts & einem Frame messen
-      var run = function(){ requestAnimationFrame(updateLineupSeparators); };
-      if (document.fonts && document.fonts.status !== 'loaded') {
-        document.fonts.ready.then(run); 
-      } else {
-        run();
+
+    function computeAll(){
+      document.querySelectorAll('.lineup .acts').forEach(computeForUL);
+    }
+
+    // öffentlich, damit CSV-Renderer nach dem Einfügen triggern kann
+    window.measureLineup = function(){
+      if(document.fonts && document.fonts.status !== 'loaded'){
+        document.fonts.ready.then(function(){ computeAll(); });
+      }else{
+        computeAll();
       }
     };
 
-    // Events
-    var deb = (function(){ var id; return function(){ clearTimeout(id); id=setTimeout(window.updateLineupSeparators, 80); }; })();
-    window.addEventListener('load', window.updateLineupSeparators);
+    // bei Resize/Orientation neu auswerten
+    var deb = (function(){ var id; return function(){ clearTimeout(id); id=setTimeout(computeAll, 100); }; })();
     window.addEventListener('resize', deb);
     window.addEventListener('orientationchange', deb);
 
-    // Falls UL-Größen sich später ändern (Wrap): beobachten
-    if (window.ResizeObserver) {
-      var ro = new ResizeObserver(function(){ window.updateLineupSeparators(); });
-      window.addEventListener('load', function(){
-        document.querySelectorAll('.lineup .acts').forEach(function(ul){ ro.observe(ul); });
-      });
+    // Sicherheitslauf nach Load
+    window.addEventListener('load', function(){ setTimeout(computeAll, 0); });
+
+    // Änderungen innerhalb des Lineups beobachten (falls CSV nachlädt)
+    var root = document.querySelector('.lineup .lu-root');
+    if(root && window.MutationObserver){
+      var mo = new MutationObserver(function(){ window.measureLineup(); });
+      mo.observe(root, {childList:true, subtree:true});
     }
   })();
   </script>
