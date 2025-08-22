@@ -190,7 +190,10 @@ body {
   border-radius: 8px;
   background: #ddd;
 }
-.fete-page .fete-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .35s ease; pointer-events: none; }
+.fete-page .fete-slide {
+  position: absolute; inset: 0;
+  opacity: 0; transition: opacity .35s ease; pointer-events: none;
+}
 .fete-page .fete-slide.active { opacity: 1; pointer-events: auto; }
 .fete-page .fete-slide img,
 .fete-page .fete-slide video { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -250,32 +253,25 @@ body {
   padding: .35rem .6rem; font-size: .95rem; margin: .25rem 0 .75rem 0;
 }
 
-/* Acts (Plakat-Look) */
+/* Acts */
 .fete-page .lineup .acts{
   list-style: none; margin: 0 0 1.4rem 0; padding: 0;
   display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
   row-gap: var(--lineup-row-gap); text-align: center;
 }
 .fete-page .lineup .acts li{
-  position: relative; /* für absolut positionierten Punkt */
   font-family: "Rubik Dirt", "Montserrat", sans-serif;
   text-transform: uppercase; letter-spacing: .03em; line-height: .9;
   color: var(--primary);
   font-size: clamp(var(--lineup-min), var(--lineup-vw), var(--lineup-max));
   padding: 0 .12em;
 }
-
-/* >>> NEU: Punkt beeinflusst Layout nicht mehr <<< */
-.fete-page .lineup .acts li + li { padding-left: .45em; }  /* fester Platz für Punkt */
 .fete-page .lineup .acts li + li::before{
   content: "•";
-  position: absolute;
-  left: .08em; top: 50%; transform: translateY(-50%);
-  color: var(--highlight); opacity: .95; line-height: 1;
-  /* kein margin → kein Einfluss auf Wrap */
+  display: inline-block; margin: 0 .18em 0 .2em; vertical-align: middle;
+  color: var(--highlight); opacity: .95;
 }
-/* Zeilenanfang: Punkt nur unsichtbar, Platz bleibt erhalten → Wrap ändert sich nicht */
-.fete-page .lineup .acts li.row-start::before{ opacity: 0; }
+.fete-page .lineup .acts li.row-start::before{ content: none; }
 
 @media (max-width: 768px) {
   .fete-page .lineup { margin: 1.6rem 0 2rem; }
