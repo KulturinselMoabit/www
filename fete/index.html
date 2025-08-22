@@ -37,18 +37,24 @@
       font-size: clamp(1.8rem, 5vw, 3rem);
       display: inline-block;
       white-space: nowrap;
+      position: relative;
     }
 
-    /* Rote Punkte NUR zwischen den Bands, nicht am Ende */
+    /* Rote Punkte NUR zwischen den Bands in derselben Zeile */
     .fete-page .lineup-fixed li:not(:last-child)::after {
       content: "•";
-      color: #FC411F;
+      color: var(--highlight);
       margin: 0 0.4em;
       opacity: 0.95;
     }
 
     /* Kein Punkt nach dem letzten Element */
     .fete-page .lineup-fixed li:last-child::after {
+      content: none !important;
+    }
+
+    /* Verbesserte JavaScript-Unterstützung für Zeilenumbrüche */
+    .fete-page .lineup-fixed li.row-start::after {
       content: none !important;
     }
 
@@ -66,6 +72,22 @@
       
       .fete-page .lineup-fixed li:not(:last-child)::after {
         margin: 0 0.3em;
+      }
+      
+      /* Für mobile Ansicht - spezielle Behandlung der Punkte */
+      .fete-page .lineup-fixed li::after {
+        content: none !important;
+      }
+      
+      .fete-page .lineup-fixed li:not(:last-child) {
+        margin-right: 0.4em;
+      }
+      
+      .fete-page .lineup-fixed li:not(.row-start):not(:last-child)::after {
+        content: "•" !important;
+        position: relative;
+        margin-left: 0.4em;
+        color: var(--highlight);
       }
     }
   </style>
@@ -344,8 +366,8 @@
       function stop(){ clearInterval(timer); timer = null; }
       slider.addEventListener('mouseenter',()=>hover=true);
       slider.addEventListener('mouseleave',()=>hover=false);
-      slider.addEventListener('touchstart', ()=>hover=true, {passive:true});
-      slider.addEventListener('touchend',   ()=>hover=false, {passive:true});
+      slider.addEventListener('touchstart', ()=>hover=true, {passive:true);
+      slider.addEventListener('touchend',   ()=>hover=false, {passive:true);
       document.addEventListener('visibilitychange', ()=>{ document.hidden ? stop() : start(); });
       start();
     })();
