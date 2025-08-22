@@ -147,115 +147,10 @@ body {
    ===============  NUR FÜR DIE FÊTE-SEITE (namespaced)  ===============
    ===================================================================== */
 
-.fete-page {
-  --lineup-min: 1.8rem;
-  --lineup-vw:  5vw;
-  --lineup-max: 3rem;
-  --lineup-row-gap: .6em;
-}
+/* =============== KORRIGIERTES LINE-UP CSS =============== */
 
-/* Vollbreit-Text in der Fête-Seite (Bildspalte weg) */
-.fete-page .page-img { display: none; }
-.fete-page .page-text { grid-column: 1 / -1; }
-
-/* Banner */
-.fete-page .fete-banner { margin: .2rem 0 1rem; }
-.fete-page .fete-banner-img { display:block; width:100%; height:auto; }
-
-/* Meta-Zeile */
-.fete-page .fete-meta {
-  width: 100%;
-  display: flex; justify-content: center; align-items: center; gap: .6rem;
-  margin: .25rem 0 1.25rem;
-  font-weight: 800; letter-spacing: .03em;
-  font-size: clamp(1.1rem, 2.3vw, 1.4rem);
-}
-.fete-page .fete-meta .sep { color: var(--highlight); }
-@media (max-width: 560px){
-  .fete-page .fete-meta { flex-direction: column; gap: .25rem; }
-  .fete-page .fete-meta .sep { display: none; }
-}
-
-/* Intro-Text */
-.fete-page .info-block { margin: 1rem 0 2rem; }
-
-/* Slideshow – clean */
-.fete-page .fete-hero { margin: 1rem 0 2rem; }
-.fete-page .fete-slider {
-  position: relative;
-  width: 100%;
-  max-width: 100%;
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-  border: none;
-  border-radius: 8px;
-  background: #ddd;
-}
-.fete-page .fete-slide {
-  position: absolute; inset: 0;
-  opacity: 0; transition: opacity .35s ease; pointer-events: none;
-}
-.fete-page .fete-slide.active { opacity: 1; pointer-events: auto; }
-.fete-page .fete-slide img,
-.fete-page .fete-slide video { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-/* Controls – clean */
-.fete-page .fete-control {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  border: none; background: rgba(255,255,255,.75); color: var(--primary);
-  font-weight: 800; width: 2rem; height: 2rem; line-height: 2rem; border-radius: 999px;
-  text-align: center; cursor: pointer; z-index: 2;
-}
-.fete-page .fete-control:hover { background: rgba(255,255,255,.95); }
-.fete-page .fete-control.prev { left: .6rem; }
-.fete-page .fete-control.next { right: .6rem; }
-
-/* Dots – clean */
-.fete-page .fete-dots {
-  position: absolute; left: 0; right: 0; bottom: .5rem;
-  display: flex; justify-content: center; gap: .4rem; padding: 0 .5rem; z-index: 2;
-}
-.fete-page .fete-dot {
-  width: .5rem; height: .5rem; border-radius: 999px;
-  border: 1px solid var(--primary); background: rgba(255,255,255,.85); cursor: pointer;
-}
-.fete-page .fete-dot.active { background: var(--highlight); border-color: var(--highlight); }
-
-/* LINE-UP */
-.fete-page .lineup { margin: 2.2rem 0 2rem; }
-.fete-page .lineup-wrap { text-align: center; }
-
-/* Überschriften (Line-Up & Eintritt) */
-.fete-page .lineup .lineup-heading,
-.fete-page .section-title{
-  display:inline-block;
-  font-family: 'Montserrat', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  font-weight: 800;
-  color: var(--primary);
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  font-size: clamp(1.8rem, 4.2vw, 2.6rem);
-  margin: .25rem 0 1rem;
-  position: relative;
-  padding-bottom: .2rem;
-}
-.fete-page .lineup .lineup-heading::after,
-.fete-page .section-title::after{
-  content:"";
-  position:absolute; left:0; right:0; bottom:-.2rem;
-  height:.18rem; background: var(--highlight);
-  border-radius: 2px;
-}
-
-/* Day-Tag */
-.fete-page .lineup .lineup-daytag{
-  display: inline-block; background: var(--primary); color: #fff;
-  font-weight: 800; letter-spacing: .06em; border-radius: 6px;
-  padding: .35rem .6rem; font-size: .95rem; margin: .25rem 0 .75rem 0;
-}
-
-/* Acts - Korrigierte Darstellung mit Punkten zwischen den Bands */
-.fete-page .lineup-fixed{
+/* Acts - Komplett überarbeitete Darstellung */
+.fete-page .lineup-fixed {
   list-style: none; 
   margin: 0 0 1.4rem 0; 
   padding: 0;
@@ -263,96 +158,47 @@ body {
   flex-wrap: wrap; 
   justify-content: center; 
   align-items: center;
-  row-gap: 0.6em; 
   text-align: center;
 }
 
-.fete-page .lineup-fixed li{
+.fete-page .lineup-fixed li {
   font-family: "Rubik Dirt", "Montserrat", sans-serif;
   text-transform: uppercase; 
   letter-spacing: .03em; 
   line-height: .9;
   color: var(--primary);
   font-size: clamp(1.8rem, 5vw, 3rem);
-  padding: 0 .12em;
-  position: relative;
-  display: flex;
-  align-items: center;
+  display: inline-block;
+  white-space: nowrap;
 }
 
-/* Rote Punkte zwischen den Bandnamen, nicht am Ende */
+/* Rote Punkte NUR zwischen den Bands, nicht am Ende */
 .fete-page .lineup-fixed li:not(:last-child)::after {
   content: "•";
   color: #FC411F;
-  margin-left: 0.4em;
-  margin-right: 0.2em;
+  margin: 0 0.4em;
   opacity: 0.95;
 }
 
-/* Kein Punkt nach dem letzten Element einer Zeile */
-.fete-page .lineup-fixed li.row-start::after {
+/* Kein Punkt nach dem letzten Element */
+.fete-page .lineup-fixed li:last-child::after {
   content: none !important;
 }
 
 /* Mobile-Optimierung für die Acts */
 @media (max-width: 768px) {
-  .fete-page .lineup { margin: 1.6rem 0 2rem; }
-  .fete-page .lineup .lineup-daytag { margin-top: .5rem; }
   .fete-page .lineup-fixed {
     justify-content: flex-start;
     padding: 0 1rem;
   }
+  
   .fete-page .lineup-fixed li {
     font-size: clamp(1.6rem, 4.5vw, 2.2rem);
+    white-space: normal;
   }
   
-  /* Für mobile Ansicht - spezielle Behandlung der Punkte */
-  .fete-page .lineup-fixed li::after {
-    content: none !important;
-  }
-  
-  .fete-page .lineup-fixed li:not(:last-child) {
-    margin-right: 0.4em;
-  }
-  
-  .fete-page .lineup-fixed li:not(.row-start):not(:last-child)::after {
-    content: "•" !important;
-    position: relative;
-    margin-left: 0.4em;
-    color: #FC411F;
+  .fete-page .lineup-fixed li:not(:last-child)::after {
+    margin: 0 0.3em;
   }
 }
 
-/* Eintritt */
-.fete-page .entry { margin: .75rem 0 2rem; text-align: left; }
-.fete-page .entry p { margin-bottom: .75rem; }
-.fete-page .entry ul { list-style: none; margin: 0 0 1rem 0; padding: 0; }
-.fete-page .entry li { margin: .25rem 0; }
-
-/* Mobile-Polish nur für Fête */
-@media (max-width: 768px) {
-  .fete-page .page-text { padding-inline: 12px; }
-  .fete-page .fete-slider { margin-inline: 0; }
-  .fete-page .fete-banner,
-  .fete-page .fete-meta,
-  .fete-page .lineup,
-  .fete-page .entry,
-  .fete-page .info-block {
-    max-width: 100%;
-    margin-inline: 0;
-    padding-inline: 2px;
-  }
-}
-.fete-page img,
-.fete-page video {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  box-sizing: border-box;
-}
-.fete-page { overflow-x: hidden; }
-.fete-page .lineup .acts { padding-inline: .25rem; }
-.fete-page .lineup .acts li{ overflow-wrap: anywhere; word-break: break-word; hyphens: auto; }
-.fete-page .fete-slider { overflow: hidden; }
-.fete-page .fete-dots { padding: 0 .35rem; }
-.fete-page .fete-control { width: 2rem; height: 2rem; line-height: 2rem; }
