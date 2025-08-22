@@ -142,6 +142,7 @@ body {
 .page-text img.qr-code { width: 150px; height: auto; display: block; margin: 1.5rem 0; object-fit: contain; }
 @media (max-width: 768px) { .page-text img.qr-code { width: 120px; height: auto; } }
 
+
 /* =====================================================================
    ===============  NUR FÜR DIE FÊTE-SEITE (namespaced)  ===============
    ===================================================================== */
@@ -280,7 +281,7 @@ body {
 }
 
 /* Rote Punkte zwischen den Bandnamen, nicht am Ende */
-.fete-page .lineup-fixed li:not(:last-child):after {
+.fete-page .lineup-fixed li:not(:last-child)::after {
   content: "•";
   color: #FC411F;
   margin-left: 0.4em;
@@ -289,8 +290,7 @@ body {
 }
 
 /* Kein Punkt nach dem letzten Element einer Zeile */
-.fete-page .lineup-fixed li.row-start:after,
-.fete-page .lineup-fixed li:last-child:after {
+.fete-page .lineup-fixed li.row-start::after {
   content: none !important;
 }
 
@@ -307,7 +307,7 @@ body {
   }
   
   /* Für mobile Ansicht - spezielle Behandlung der Punkte */
-  .fete-page .lineup-fixed li:after {
+  .fete-page .lineup-fixed li::after {
     content: none !important;
   }
   
@@ -315,7 +315,7 @@ body {
     margin-right: 0.4em;
   }
   
-  .fete-page .lineup-fixed li:not(.row-start):not(:last-child):after {
+  .fete-page .lineup-fixed li:not(.row-start):not(:last-child)::after {
     content: "•" !important;
     position: relative;
     margin-left: 0.4em;
