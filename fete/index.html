@@ -297,30 +297,29 @@
     })();
   })();
   </script>
-
-  <!-- JS: Line-up – kein Punkt am Zeilenanfang -->
-  <script>
-  (function () {
-    function updateLineupSeparators() {
-      document.querySelectorAll('.lineup-fixed').forEach(ul => {
-        const items = Array.from(ul.children);
-        let lastTop = null;
-        items.forEach((li, idx) => {
-          li.classList.remove('row-start');
-          const t = li.offsetTop;
-          if (idx === 0 || lastTop === null || Math.abs(t - lastTop) > 1) {
-            li.classList.add('row-start');
-            lastTop = t;
-          }
-        });
+<!-- JS: Line-up – kein Punkt am Zeilenanfang -->
+<script>
+(function () {
+  function updateLineupSeparators() {
+    document.querySelectorAll('.lineup-fixed').forEach(ul => {
+      const items = Array.from(ul.children);
+      let lastTop = null;
+      items.forEach((li, idx) => {
+        li.classList.remove('row-start');
+        const t = li.offsetTop;
+        if (idx === 0 || lastTop === null || Math.abs(t - lastTop) > 1) {
+          li.classList.add('row-start');
+          lastTop = t;
+        }
       });
-    }
-    const debounce = (() => { let id; return () => { clearTimeout(id); id = setTimeout(updateLineupSeparators, 100); }; })();
-    window.addEventListener('load', updateLineupSeparators);
-    window.addEventListener('resize', debounce);
-    window.addEventListener('orientationchange', debounce);
-    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(updateLineupSeparators); }
-  })();
-  </script>
+    });
+  }
+  const debounce = (() => { let id; return () => { clearTimeout(id); id = setTimeout(updateLineupSeparators, 100); }; })();
+  window.addEventListener('load', updateLineupSeparators);
+  window.addEventListener('resize', debounce);
+  window.addEventListener('orientationchange', debounce);
+  if (document.fonts && document.fonts.ready) { document.fonts.ready.then(updateLineupSeparators); }
+})();
+</script>
 </body>
 </html>
