@@ -12,6 +12,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap" rel="stylesheet">
   <!-- CSS -->
   <link rel="stylesheet" href="../styles.css?v=simple-banner" />
+
+  <!-- Mini-Override NUR für diese Seite:
+       Wenn .acts die Klasse .js-seps hat, unterdrücken wir die alten Auto-Punkte.
+       (Keine Änderung an /styles.css) -->
+  <style>
+    .fete-page .lineup .acts.js-seps li + li::before { content: none !important; }
+  </style>
 </head>
 <body class="fete-page">
 
@@ -192,25 +199,20 @@
         if(!items.length) return;
 
         var slides=[], dots=[];
-        function addSlide(node, i){
+        function addSlide(node,i){
           var wrap=mk('div','fete-slide');
           wrap.setAttribute('data-index', i);
           wrap.setAttribute('aria-hidden','true');
           wrap.appendChild(node);
           slider.insertBefore(wrap, dotsWrap);
 
-          var dot=mk('button','fete-dot');
-          dot.type='button';
-          dot.setAttribute('aria-label','Slide '+(i+1));
+          var dot=mk('button','fete-dot'); dot.type='button'; dot.setAttribute('aria-label','Slide '+(i+1));
           dotsWrap.appendChild(dot);
-
           slides.push(wrap); dots.push(dot);
         }
         items.forEach(function(it,i){ addSlide(it.node,i); });
 
-        slider.appendChild(prevBtn);
-        slider.appendChild(nextBtn);
-        slider.appendChild(dotsWrap);
+        slider.appendChild(prevBtn); slider.appendChild(nextBtn); slider.appendChild(dotsWrap);
 
         var current=0;
         function show(i){
@@ -224,19 +226,18 @@
           });
           dots.forEach(function(d,idx){ d.classList.toggle('active', idx===current); });
         }
-
         prevBtn.addEventListener('click', function(){ show(current-1); });
         nextBtn.addEventListener('click', function(){ show(current+1); });
 
         slider.setAttribute('tabindex','0');
         slider.addEventListener('keydown', function(e){
-          if(e.key==='ArrowLeft') show(current-1);
+          if(e.key==='ArrowLeft')  show(current-1);
           if(e.key==='ArrowRight') show(current+1);
         });
 
         var sx=null;
         slider.addEventListener('touchstart', function(e){ sx=e.touches[0].clientX; }, {passive:true});
-        slider.addEventListener('touchend', function(e){
+        slider.addEventListener('touchend',   function(e){
           if(sx==null) return;
           var dx=e.changedTouches[0].clientX - sx;
           if(Math.abs(dx)>40) (dx<0 ? show(current+1) : show(current-1));
@@ -244,7 +245,6 @@
         }, {passive:true});
 
         show(0);
-
         var timer=null, hover=false;
         function next(){ nextBtn.click(); }
         function start(){ if(!timer && slides.length>1) timer=setInterval(function(){ if(!hover && !document.hidden) next(); }, 5000); }
@@ -252,7 +252,7 @@
         slider.addEventListener('mouseenter',function(){ hover=true; });
         slider.addEventListener('mouseleave',function(){ hover=false; });
         slider.addEventListener('touchstart', function(){ hover=true; }, {passive:true});
-        slider.addEventListener('touchend', function(){ hover=false; }, {passive:true});
+        slider.addEventListener('touchend',   function(){ hover=false; }, {passive:true});
         document.addEventListener('visibilitychange', function(){ document.hidden ? stop() : start(); });
         start();
       });
@@ -303,7 +303,7 @@
       return (base.charAt(base.length-1)==='/'?base:base+'/') + u.replace(/^\/+/,"");
     }
 
-    // Fallback-Blöcke entfernen
+    // Statische Fallbacks entfernen
     Array.prototype.forEach.call(wrap.querySelectorAll('.line'), function(n){ if(n.parentNode) n.parentNode.removeChild(n); });
 
     // Dialog
@@ -379,69 +379,89 @@
           var dayRaw=pick(row,DAY_KEYS)||"", start=pick(row,START_KEYS), end=pick(row,END_KEYS), description=pick(row,DESC_KEYS), image=imgURL(pick(row,IMG_KEYS));
           var key=lc(dayRaw)||"lineup";
           if(!byKey[key]){ var label=normalizeDayLabel(dayRaw||"Line-up"); byKey[key]={key:key,label:label,items:[]}; groups.push(byKey[key]); }
-          byKey[key].items.push({ artist:artist, start:start, end:end, description:description, image:image, t:timeToMinutes(start) });
+          byKey[key].items.push({ artist:artist, start:start, end=end, description:description, image:image, t:timeToMinutes(start) });
         });
 
         groups.forEach(function(g){ g.items.sort(function(a,b){ return a.t-b.t; }); });
         groups.forEach(function(g){ root.appendChild(renderDayBlock(g.label,g.items)); });
 
-        // nach dem Rendern: Separatoren berechnen
+        // Nach dem Rendern: Punkte setzen
         setTimeout(function(){ window.dispatchEvent(new Event('resize')); },0);
       })
       .catch(function(err){ console.error(err); });
   })();
   </script>
 
-  <!-- JS: Line-up – Punkte nur am echten Zeilenanfang (Centerline-Messung) -->
+  <!-- JS: Punkte als Overlays (verursachen keinen Umbruch) -->
   <script>
-  (function () {
-    function computeStartsByCenter(ul) {
-      var items = Array.prototype.slice.call(ul.children);
-      var starts = [];
-      var lastCenter = null;
-      var TOL = 4; // px – kleine Abweichungen erlauben
-
-      for (var i=0;i<items.length;i++){
-        var r = items[i].getBoundingClientRect();
-        var center = Math.round(r.top + r.height/2);
-        if (i===0 || lastCenter===null || Math.abs(center - lastCenter) > TOL) {
-          starts.push(i);
-          lastCenter = center;
-        }
-      }
-      return starts;
-    }
-
-    function applyStarts(ul, starts){
-      var items = Array.prototype.slice.call(ul.children);
-      items.forEach(function(li){ li.classList.remove('row-start'); });
-      starts.forEach(function(idx){ if(items[idx]) items[idx].classList.add('row-start'); });
-    }
-
-    function eq(a,b){
-      if(a.length!==b.length) return false;
-      for(var i=0;i<a.length;i++){ if(a[i]!==b[i]) return false; }
-      return true;
-    }
-
-    function updateLineupSeparators() {
-      var lists=document.querySelectorAll('.lineup .acts');
-      Array.prototype.forEach.call(lists, function(ul){
-        var s1 = computeStartsByCenter(ul);
-        applyStarts(ul, s1);
-        // stabilisieren (falls das Entfernen eines Punktes die Zeilen ändert)
-        var s2 = computeStartsByCenter(ul);
-        if(!eq(s1,s2)){ applyStarts(ul, s2); }
+  (function(){
+    function clearDots(ul){
+      // alte Overlay-Dots entfernen
+      var olds = ul.querySelectorAll('.lu-dot');
+      olds.forEach(function(n){ n.parentNode && n.parentNode.removeChild(n); });
+      // evtl. Inline-Styles von LIs zurücksetzen
+      Array.prototype.forEach.call(ul.children, function(li){
+        if(li.dataset.dotPos){ li.style.position = li.dataset.dotPos; delete li.dataset.dotPos; }
       });
     }
 
-    var deb=(function(){var id; return function(){ cancelAnimationFrame(id); id=requestAnimationFrame(updateLineupSeparators); };})();
-    window.addEventListener('load', updateLineupSeparators);
+    function placeDots(ul){
+      ul.classList.add('js-seps'); // alte Auto-Punkte unterdrücken
+      clearDots(ul);
+
+      var items = Array.prototype.slice.call(ul.children);
+      if(items.length < 2) return;
+
+      // Reihen nach Zeile clustern (ohne Toleranz-Probleme)
+      var rows = [];
+      var TOL = 3;
+      items.forEach(function(li){
+        var t = Math.round(li.getBoundingClientRect().top);
+        var row = rows.find(function(r){ return Math.abs(r.top - t) <= TOL; });
+        if(!row){ row = { top:t, items:[] }; rows.push(row); }
+        row.items.push(li);
+      });
+
+      // In jeder Zeile zwischen benachbarten Items einen Overlay-Punkt setzen
+      rows.forEach(function(r){
+        for(var i=0;i<r.items.length-1;i++){
+          var a = r.items[i];
+          var b = r.items[i+1];
+          // li 'a' als Bezugspunkt
+          var prevPos = getComputedStyle(a).position;
+          if(prevPos === 'static'){ a.dataset.dotPos='static'; a.style.position='relative'; }
+
+          var dot = document.createElement('span');
+          dot.className = 'lu-dot';
+          dot.setAttribute('aria-hidden','true');
+          dot.textContent = '•';
+          // absolute Position: rechts neben 'a', leicht mittig vertikal
+          dot.style.position = 'absolute';
+          dot.style.left = '100%';
+          dot.style.top = '50%';
+          dot.style.transform = 'translate(0.22em,-50%)';
+          dot.style.pointerEvents = 'none';
+          dot.style.color = 'var(--highlight)';
+          dot.style.lineHeight = '1';
+          dot.style.userSelect = 'none';
+
+          a.appendChild(dot);
+        }
+      });
+    }
+
+    function updateAll(){
+      var lists = document.querySelectorAll('.lineup .acts');
+      lists.forEach(placeDots);
+    }
+
+    var deb=(function(){var id; return function(){ clearTimeout(id); id=setTimeout(updateAll, 100); };})();
+    window.addEventListener('load', updateAll);
     window.addEventListener('resize', deb);
     window.addEventListener('orientationchange', deb);
-    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(updateLineupSeparators); }
-    // Safety: nach CSV-Render wird ein resize-Event getriggert; hier nochmal als Backup:
-    setTimeout(updateLineupSeparators, 500);
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(updateAll); }
+    // Fallback – falls Assets später kommen
+    setTimeout(updateAll, 500);
   })();
   </script>
 </body>
