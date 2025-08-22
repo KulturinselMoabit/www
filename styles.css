@@ -253,28 +253,44 @@ body {
   padding: .35rem .6rem; font-size: .95rem; margin: .25rem 0 .75rem 0;
 }
 
-/* Acts - Zusätzliche Klasse für die korrigierte Darstellung */
+/* Acts - Korrigierte Darstellung mit Punkten zwischen den Bands */
 .fete-page .lineup-fixed{
-  list-style: none; margin: 0 0 1.4rem 0; padding: 0;
-  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
-  row-gap: 0.6em; text-align: center;
+  list-style: none; 
+  margin: 0 0 1.4rem 0; 
+  padding: 0;
+  display: flex; 
+  flex-wrap: wrap; 
+  justify-content: center; 
+  align-items: center;
+  row-gap: 0.6em; 
+  text-align: center;
 }
+
 .fete-page .lineup-fixed li{
   font-family: "Rubik Dirt", "Montserrat", sans-serif;
-  text-transform: uppercase; letter-spacing: .03em; line-height: .9;
+  text-transform: uppercase; 
+  letter-spacing: .03em; 
+  line-height: .9;
   color: var(--primary);
   font-size: clamp(1.8rem, 5vw, 3rem);
   padding: 0 .12em;
   position: relative;
+  display: flex;
+  align-items: center;
 }
-.fete-page .lineup-fixed li:not(:last-child)::after {
+
+/* Rote Punkte zwischen den Bandnamen, nicht am Ende */
+.fete-page .lineup-fixed li:not(:last-child):after {
   content: "•";
-  display: inline-block;
-  margin-left: 0.4em;
   color: #FC411F;
+  margin-left: 0.4em;
+  margin-right: 0.2em;
   opacity: 0.95;
 }
-.fete-page .lineup-fixed li.row-start::after {
+
+/* Kein Punkt nach dem letzten Element einer Zeile */
+.fete-page .lineup-fixed li.row-start:after,
+.fete-page .lineup-fixed li:last-child:after {
   content: none !important;
 }
 
@@ -289,16 +305,20 @@ body {
   .fete-page .lineup-fixed li {
     font-size: clamp(1.6rem, 4.5vw, 2.2rem);
   }
-  .fete-page .lineup-fixed li:not(:last-child)::after {
-    content: none;
+  
+  /* Für mobile Ansicht - spezielle Behandlung der Punkte */
+  .fete-page .lineup-fixed li:after {
+    content: none !important;
   }
+  
   .fete-page .lineup-fixed li:not(:last-child) {
-    margin-right: 0.8em;
+    margin-right: 0.4em;
   }
-  .fete-page .lineup-fixed li:not(.row-start):not(:last-child)::after {
-    content: "•";
-    position: absolute;
-    right: -0.6em;
+  
+  .fete-page .lineup-fixed li:not(.row-start):not(:last-child):after {
+    content: "•" !important;
+    position: relative;
+    margin-left: 0.4em;
     color: #FC411F;
   }
 }
