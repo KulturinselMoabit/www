@@ -14,7 +14,61 @@
   <link href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap" rel="stylesheet">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="../styles.css?v=simple-banner" />
+  <link rel="stylesheet" href="/styles.css?v=simple-banner" />
+  <style>
+    /* Zusätzliches CSS für die roten Punkte zwischen den Bands */
+    .fete-page .lineup-fixed {
+      list-style: none; 
+      margin: 0 0 1.4rem 0; 
+      padding: 0;
+      display: flex; 
+      flex-wrap: wrap; 
+      justify-content: center; 
+      align-items: center;
+      text-align: center;
+    }
+
+    .fete-page .lineup-fixed li {
+      font-family: "Rubik Dirt", "Montserrat", sans-serif;
+      text-transform: uppercase; 
+      letter-spacing: .03em; 
+      line-height: .9;
+      color: var(--primary);
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    /* Rote Punkte NUR zwischen den Bands, nicht am Ende */
+    .fete-page .lineup-fixed li:not(:last-child)::after {
+      content: "•";
+      color: #FC411F;
+      margin: 0 0.4em;
+      opacity: 0.95;
+    }
+
+    /* Kein Punkt nach dem letzten Element */
+    .fete-page .lineup-fixed li:last-child::after {
+      content: none !important;
+    }
+
+    /* Mobile-Optimierung für die Acts */
+    @media (max-width: 768px) {
+      .fete-page .lineup-fixed {
+        justify-content: flex-start;
+        padding: 0 1rem;
+      }
+      
+      .fete-page .lineup-fixed li {
+        font-size: clamp(1.6rem, 4.5vw, 2.2rem);
+        white-space: normal;
+      }
+      
+      .fete-page .lineup-fixed li:not(:last-child)::after {
+        margin: 0 0.3em;
+      }
+    }
+  </style>
 </head>
 <body class="fete-page">
 
@@ -297,29 +351,30 @@
     })();
   })();
   </script>
-<!-- JS: Line-up – kein Punkt am Zeilenanfang -->
-<script>
-(function () {
-  function updateLineupSeparators() {
-    document.querySelectorAll('.lineup-fixed').forEach(ul => {
-      const items = Array.from(ul.children);
-      let lastTop = null;
-      items.forEach((li, idx) => {
-        li.classList.remove('row-start');
-        const t = li.offsetTop;
-        if (idx === 0 || lastTop === null || Math.abs(t - lastTop) > 1) {
-          li.classList.add('row-start');
-          lastTop = t;
-        }
+
+  <!-- JS: Line-up – kein Punkt am Zeilenanfang -->
+  <script>
+  (function () {
+    function updateLineupSeparators() {
+      document.querySelectorAll('.lineup-fixed').forEach(ul => {
+        const items = Array.from(ul.children);
+        let lastTop = null;
+        items.forEach((li, idx) => {
+          li.classList.remove('row-start');
+          const t = li.offsetTop;
+          if (idx === 0 || lastTop === null || Math.abs(t - lastTop) > 1) {
+            li.classList.add('row-start');
+            lastTop = t;
+          }
+        });
       });
-    });
-  }
-  const debounce = (() => { let id; return () => { clearTimeout(id); id = setTimeout(updateLineupSeparators, 100); }; })();
-  window.addEventListener('load', updateLineupSeparators);
-  window.addEventListener('resize', debounce);
-  window.addEventListener('orientationchange', debounce);
-  if (document.fonts && document.fonts.ready) { document.fonts.ready.then(updateLineupSeparators); }
-})();
-</script>
+    }
+    const debounce = (() => { let id; return () => { clearTimeout(id); id = setTimeout(updateLineupSeparators, 100); }; })();
+    window.addEventListener('load', updateLineupSeparators);
+    window.addEventListener('resize', debounce);
+    window.addEventListener('orientationchange', debounce);
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(updateLineupSeparators); }
+  })();
+  </script>
 </body>
 </html>
