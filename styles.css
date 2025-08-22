@@ -6,7 +6,7 @@
   --gap-col:   1fr;
   --gutter:    2rem;
   --pad-lg:    2rem;
-  --pad-sm:    .75rem; 
+  --pad-sm:    .75rem;
 }
 
 /* Reset */
@@ -95,7 +95,7 @@ body {
 .page-text .divider { width: 3rem; height: 1px; background: var(--highlight); margin: 0 auto 2rem; border: none; }
 .page-text .divider_long { width: 9rem; height: 1px; background: var(--highlight); margin: 0 auto 2rem; border: none; }
 .page-text p { margin-bottom: 1.5rem; font-size: 1rem; line-height: 1.2; text-align: justify; }
-.page-text img.fullwidth { width: 100%; height: auto; display: block; float: none; }
+.page-text img.fullwidth { width: 100%; height: auto; display: block; float: none; margin: 0; }
 
 /* ----------Bilder im Text-------------- */
 .page-text img.float-left-third   { float: left;  width: 33.333%; height: auto; margin: 0 1em 1em 0; display: block; box-shadow: 0 0 8px rgba(0,0,0,.1); }
@@ -190,10 +190,7 @@ body {
   border-radius: 8px;
   background: #ddd;
 }
-.fete-page .fete-slide {
-  position: absolute; inset: 0;
-  opacity: 0; transition: opacity .35s ease; pointer-events: none;
-}
+.fete-page .fete-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .35s ease; pointer-events: none; }
 .fete-page .fete-slide.active { opacity: 1; pointer-events: auto; }
 .fete-page .fete-slide img,
 .fete-page .fete-slide video { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -253,42 +250,32 @@ body {
   padding: .35rem .6rem; font-size: .95rem; margin: .25rem 0 .75rem 0;
 }
 
-/* Acts */
+/* Acts (Plakat-Look) */
 .fete-page .lineup .acts{
   list-style: none; margin: 0 0 1.4rem 0; padding: 0;
-  display: flex; flex-wrap: wrap; justify-content: center;
-  /* WICHTIG: Top-Alignment für stabile Zeilenerkennung */
-  align-items: flex-start;
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
   row-gap: var(--lineup-row-gap); text-align: center;
 }
 .fete-page .lineup .acts li{
+  position: relative; /* für absolut positionierten Punkt */
   font-family: "Rubik Dirt", "Montserrat", sans-serif;
   text-transform: uppercase; letter-spacing: .03em; line-height: .9;
   color: var(--primary);
   font-size: clamp(var(--lineup-min), var(--lineup-vw), var(--lineup-max));
   padding: 0 .12em;
 }
+
+/* >>> NEU: Punkt beeinflusst Layout nicht mehr <<< */
+.fete-page .lineup .acts li + li { padding-left: .45em; }  /* fester Platz für Punkt */
 .fete-page .lineup .acts li + li::before{
   content: "•";
-  display: inline-block; margin: 0 .18em 0 .2em; vertical-align: middle;
-  color: var(--highlight); opacity: .95;
+  position: absolute;
+  left: .08em; top: 50%; transform: translateY(-50%);
+  color: var(--highlight); opacity: .95; line-height: 1;
+  /* kein margin → kein Einfluss auf Wrap */
 }
-.fete-page .lineup .acts li.row-start::before{ content: none; }
-
-/* CSV-Buttons wie Text + rote Hover-Unterlinie */
-.fete-page .lineup .acts .lu-act{
-  background: none; border: none; padding: 0 .02em; margin: 0;
-  font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; line-height: inherit;
-  display: inline-block; cursor: pointer; position: relative;
-}
-.fete-page .lineup .acts .lu-act::-moz-focus-inner{ border:0; padding:0; }
-.fete-page .lineup .acts .lu-act::after{
-  content:''; position:absolute; left:50%; bottom:-.05em; transform: translateX(-50%);
-  width:0; height:.08em; background: var(--highlight); transition: width .25s ease;
-}
-.fete-page .lineup .acts .lu-act:hover::after,
-.fete-page .lineup .acts .lu-act:focus-visible::after{ width:100%; }
-.fete-page .lineup .acts .lu-act:focus-visible{ outline:2px solid var(--highlight); outline-offset:.08em; }
+/* Zeilenanfang: Punkt nur unsichtbar, Platz bleibt erhalten → Wrap ändert sich nicht */
+.fete-page .lineup .acts li.row-start::before{ opacity: 0; }
 
 @media (max-width: 768px) {
   .fete-page .lineup { margin: 1.6rem 0 2rem; }
@@ -316,11 +303,15 @@ body {
   }
 }
 .fete-page img,
-.fete-page video { display: block; max-width: 100%; height: auto; box-sizing: border-box; }
+.fete-page video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  box-sizing: border-box;
+}
 .fete-page { overflow-x: hidden; }
 .fete-page .lineup .acts { padding-inline: .25rem; }
 .fete-page .lineup .acts li{ overflow-wrap: anywhere; word-break: break-word; hyphens: auto; }
 .fete-page .fete-slider { overflow: hidden; }
 .fete-page .fete-dots { padding: 0 .35rem; }
 .fete-page .fete-control { width: 2rem; height: 2rem; line-height: 2rem; }
-
