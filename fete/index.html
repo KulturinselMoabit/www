@@ -15,7 +15,7 @@
   <!-- CSS -->
   <link rel="stylesheet" href="../styles.css?v=simple-banner" />
 
-  <!-- Mini-Override nur hier: wenn JS die Klasse .js-seps setzt, werden alte Auto-Punkte unterdrückt -->
+  <!-- NUR FÜR DIESE SEITE: alte Auto-Punkte ausblenden, wenn JS .js-seps setzt -->
   <style>
     .fete-page .lineup .acts.js-seps li + li::before { content: none !important; }
   </style>
@@ -213,7 +213,7 @@
 
           slides.push(wrap); dots.push(dot);
         }
-        items.forEach(function(it,i){ addSlide(it.node, i); });
+        items.forEach(function(it,i){ addSlide(it.node,i); });
 
         slider.appendChild(prevBtn);
         slider.appendChild(nextBtn);
@@ -310,7 +310,7 @@
       return (base.charAt(base.length-1)==='/'?base:base+'/') + u.replace(/^\/+/,"");
     }
 
-    // Fallback-HTML entfernen
+    // Statische Fallbacks entfernen
     Array.prototype.forEach.call(wrap.querySelectorAll('.line'), function(n){ if(n.parentNode) n.parentNode.removeChild(n); });
 
     // Dialog
@@ -392,64 +392,59 @@
         groups.forEach(function(g){ g.items.sort(function(a,b){ return a.t-b.t; }); });
         groups.forEach(function(g){ root.appendChild(renderDayBlock(g.label,g.items)); });
 
-        // Nach dem Rendern: Punkte-Overlays setzen
+        // Nach dem Rendern: Punkte setzen
         setTimeout(function(){ window.dispatchEvent(new Event('resize')); },0);
       })
       .catch(function(err){ console.error(err); });
   })();
   </script>
 
-  <!-- JS: Punkte als Overlays (nehmen keinen Platz ein) -->
+  <!-- JS: Punkte als Overlays auf dem UL (oberhalb der Schrift) -->
   <script>
   (function(){
     function clearDots(ul){
       var olds = ul.querySelectorAll('.lu-dot');
-      Array.from(olds).forEach(function(n){ if(n.parentNode) n.parentNode.removeChild(n); });
-      Array.prototype.forEach.call(ul.children, function(li){
-        if(li.dataset.dotPos){ li.style.position = li.dataset.dotPos; delete li.dataset.dotPos; }
-      });
+      Array.prototype.forEach.call(olds, function(n){ if(n.parentNode) n.parentNode.removeChild(n); });
+      if(ul.dataset.ulPos){ ul.style.position = ul.dataset.ulPos; delete ul.dataset.ulPos; }
     }
 
     function placeDots(ul){
-      ul.classList.add('js-seps'); // alte Auto-Punkte deaktivieren
+      ul.classList.add('js-seps');           // alte Auto-Punkte ausschalten
       clearDots(ul);
+
+      // UL für absolute Overlays vorbereiten
+      var ulPos = getComputedStyle(ul).position;
+      if(ulPos === 'static'){ ul.dataset.ulPos='static'; ul.style.position='relative'; }
 
       var items = Array.prototype.slice.call(ul.children);
       if(items.length < 2) return;
 
-      // Zeilen clustern (mit kleiner Toleranz)
-      var rows = [];
       var TOL = 3;
-      items.forEach(function(li){
-        var t = Math.round(li.getBoundingClientRect().top);
-        var row = rows.find(function(r){ return Math.abs(r.top - t) <= TOL; });
-        if(!row){ row = { top:t, items:[] }; rows.push(row); }
-        row.items.push(li);
-      });
+      var ulRect = ul.getBoundingClientRect();
 
-      // Zwischen benachbarten Items derselben Zeile Overlay-Punkt setzen
-      rows.forEach(function(r){
-        for(var i=0;i<r.items.length-1;i++){
-          var a = r.items[i];
-          var prevPos = getComputedStyle(a).position;
-          if(prevPos === 'static'){ a.dataset.dotPos='static'; a.style.position='relative'; }
+      // Für jedes benachbarte Paar prüfen, ob in derselben Zeile → Overlay-Punkt auf UL setzen
+      for(var i=0;i<items.length-1;i++){
+        var a = items[i], b = items[i+1];
+        var ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+        var sameRow = Math.abs(ra.top - rb.top) <= TOL;
+        if(!sameRow) continue;
 
-          var dot = document.createElement('span');
-          dot.className = 'lu-dot';
-          dot.setAttribute('aria-hidden','true');
-          dot.textContent = '•';
-          dot.style.position = 'absolute';
-          dot.style.left = '100%';
-          dot.style.top = '50%';
-          dot.style.transform = 'translate(0.22em,-50%)';
-          dot.style.pointerEvents = 'none';
-          dot.style.color = 'var(--highlight)';
-          dot.style.lineHeight = '1';
-          dot.style.userSelect = 'none';
+        var dot = document.createElement('span');
+        dot.className = 'lu-dot';
+        dot.setAttribute('aria-hidden','true');
+        dot.textContent = '•';
+        dot.style.position = 'absolute';
+        dot.style.left = (ra.right - ulRect.left + 6) + 'px';
+        dot.style.top  = ( (ra.top + ra.height/2) - ulRect.top ) + 'px';
+        dot.style.transform = 'translateY(-50%)';
+        dot.style.pointerEvents = 'none';
+        dot.style.color = 'var(--highlight)';
+        dot.style.lineHeight = '1';
+        dot.style.userSelect = 'none';
+        dot.style.zIndex = '5';               // WICHTIG: über der Schrift
 
-          a.appendChild(dot);
-        }
-      });
+        ul.appendChild(dot);
+      }
     }
 
     function updateAll(){
