@@ -440,7 +440,7 @@
   })();
   </script>
 
-  <!-- JS: Line-up — Punkte nur zwischen Items derselben Zeile -->
+  <!-- JS: Line-up — Punkte nur zwischen Items derselben Zeile (mit Toleranz) -->
   <script>
   (function(){
     function applySeparators(ul){
@@ -448,29 +448,31 @@
       var items = Array.prototype.slice.call(ul.children);
       if (items.length < 2) return;
 
+      var TOL = 3; // px: erlaubt minimale Unterschiede in der Zeilenhöhe
+
       // Phase 1: ohne Punkte messen
       ul.classList.add('measuring');
       items.forEach(function(li){ li.classList.remove('sep-after'); });
       void ul.offsetWidth; // Reflow
 
-      var tops1 = items.map(function(li){ return li.offsetTop; });
+      var tops1 = items.map(function(li){ return Math.round(li.getBoundingClientRect().top); });
       var needSep = [];
       for (var i=0;i<items.length-1;i++){
-        needSep[i] = (tops1[i] === tops1[i+1]); // gleiches OffsetTop => gleiche Zeile
+        needSep[i] = (Math.abs(tops1[i] - tops1[i+1]) <= TOL); // gleiche Zeile?
       }
 
       // Anwenden
-      for (var i=0;i<items.length-1;i++){
-        if (needSep[i]) items[i].classList.add('sep-after');
+      for (var j=0;j<items.length-1;j++){
+        if (needSep[j]) items[j].classList.add('sep-after');
       }
       ul.classList.remove('measuring');
       void ul.offsetWidth;
 
       // Phase 2: überprüfen, ob Punkte Wrap verursachen -> ggf. entfernen
-      var tops2 = items.map(function(li){ return li.offsetTop; });
-      for (var i=0;i<items.length-1;i++){
-        if (needSep[i] && tops2[i] !== tops2[i+1]) {
-          items[i].classList.remove('sep-after');
+      var tops2 = items.map(function(li){ return Math.round(li.getBoundingClientRect().top); });
+      for (var k=0;k<items.length-1;k++){
+        if (needSep[k] && Math.abs(tops2[k] - tops2[k+1]) > TOL) {
+          items[k].classList.remove('sep-after');
         }
       }
     }
@@ -485,7 +487,7 @@
     window.addEventListener('resize', deb);
     window.addEventListener('orientationchange', deb);
     if (document.fonts && document.fonts.ready) { document.fonts.ready.then(updateAll); }
-    // Fallback – falls Bilder/Schriften spät kommen
+    // Fallback – falls Assets spät kommen
     setTimeout(updateAll, 500);
   })();
   </script>
