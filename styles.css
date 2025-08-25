@@ -253,81 +253,26 @@ body {
   padding: .35rem .6rem; font-size: .95rem; margin: .25rem 0 .75rem 0;
 }
 
-/* Acts - Korrigierte Darstellung mit Punkten zwischen den Bands */
-.fete-page .lineup-fixed{
-  list-style: none; 
-  margin: 0 0 1.4rem 0; 
-  padding: 0;
-  display: flex; 
-  flex-wrap: wrap; 
-  justify-content: center; 
-  align-items: center;
-  text-align: center;
+/* Acts */
+.fete-page .lineup .acts{
+  list-style: none; margin: 0 0 1.4rem 0; padding: 0;
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+  row-gap: var(--lineup-row-gap); text-align: center;
 }
-
-.fete-page .lineup-fixed li{
+.fete-page .lineup .acts li{
   font-family: "Rubik Dirt", "Montserrat", sans-serif;
-  text-transform: uppercase; 
-  letter-spacing: .03em; 
-  line-height: .9;
+  text-transform: uppercase; letter-spacing: .03em; line-height: .9;
   color: var(--primary);
-  font-size: clamp(1.8rem, 5vw, 3rem);
-  display: inline-block;
-  white-space: nowrap;
-  position: relative;
+  font-size: clamp(var(--lineup-min), var(--lineup-vw), var(--lineup-max));
+  margin: 0 .4em; /* Abstände statt Punkte */
+}
+.fete-page .lineup .acts li + li::before{
+  content: none; /* keine Punkte mehr */
 }
 
-/* Rote Punkte NUR zwischen den Bands in derselben Zeile */
-.fete-page .lineup-fixed li:not(:last-child)::after {
-  content: "•";
-  color: var(--highlight);
-  margin: 0 0.4em;
-  opacity: 0.95;
-}
-
-/* Kein Punkt nach dem letzten Element */
-.fete-page .lineup-fixed li:last-child::after {
-  content: none !important;
-}
-
-/* Kein Punkt am Zeilenanfang (wird durch JavaScript hinzugefügt) */
-.fete-page .lineup-fixed li.row-start::after {
-  content: none !important;
-}
-
-/* Mobile-Optimierung für die Acts */
 @media (max-width: 768px) {
   .fete-page .lineup { margin: 1.6rem 0 2rem; }
   .fete-page .lineup .lineup-daytag { margin-top: .5rem; }
-  .fete-page .lineup-fixed {
-    justify-content: flex-start;
-    padding: 0 1rem;
-  }
-  
-  .fete-page .lineup-fixed li {
-    font-size: clamp(1.6rem, 4.5vw, 2.2rem);
-    white-space: normal;
-  }
-  
-  .fete-page .lineup-fixed li:not(:last-child)::after {
-    margin: 0 0.3em;
-  }
-  
-  /* Für mobile Ansicht - spezielle Behandlung der Punkte */
-  .fete-page .lineup-fixed li::after {
-    content: none !important;
-  }
-  
-  .fete-page .lineup-fixed li:not(:last-child) {
-    margin-right: 0.4em;
-  }
-  
-  .fete-page .lineup-fixed li:not(.row-start):not(:last-child)::after {
-    content: "•" !important;
-    position: relative;
-    margin-left: 0.4em;
-    color: var(--highlight);
-  }
 }
 
 /* Eintritt */
