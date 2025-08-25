@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap" rel="stylesheet">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="../styles.css?v=fete-dialog-fix-2" />
+  <link rel="stylesheet" href="../styles.css?v=fete-dialog-fix-1" />
 </head>
 <body class="fete-page">
 
@@ -44,7 +44,7 @@
     <section class="container page-inner page-inner--wide">
       <div class="page-text">
 
-        <!-- Banner -->
+        <!-- Banner (einfaches IMG) -->
         <section class="fete-banner" aria-label="Festival-Banner">
           <img class="fete-banner-img" src="fete-banner.svg" alt="Fête du Seeee – Banner" />
         </section>
@@ -129,10 +129,10 @@
   </footer>
 
   <!-- Modal / Bottom-Sheet -->
-  <!-- Wichtig: KEIN 'open' im Markup -->
-  <dialog id="luDialog" class="lu-dialog" aria-label="Banddetails" inert>
+  <!-- WICHTIG: kein 'open' Attribut im Markup -->
+  <dialog id="luDialog" class="lu-dialog" aria-label="Banddetails">
     <form method="dialog" class="lu-card">
-      <button class="lu-close" aria-label="Schließen" type="button">×</button>
+      <button class="lu-close" aria-label="Schließen">×</button>
       <div class="lu-media-wrap">
         <img class="lu-media" alt="" loading="lazy" />
       </div>
@@ -290,7 +290,7 @@
   })();
   </script>
 
-  <!-- PapaParse (CDN) -->
+  <!-- PapaParse (CDN) – ohne SRI & crossorigin -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <!-- JS: Dynamisches Line-up aus Google Sheets CSV -->
@@ -303,11 +303,10 @@
     const errBox = document.getElementById('luError');
     const dlg    = document.getElementById('luDialog');
 
-    // ===== Dialog initial sicher geschlossen (kein „Geister‑Popup“) =====
+    // SAFEGUARD: Dialog sicher geschlossen beim Start
     if (dlg) {
       try { dlg.close(); } catch(_) {}
       dlg.removeAttribute('open');
-      dlg.setAttribute('inert', ''); // bis zum Öffnen inaktiv
     }
 
     if (!root) return;
@@ -404,13 +403,7 @@
     }
 
     function openDialog(a){
-      if (!dlg) return;
-
-      // Entferne inert & öffne
-      dlg.removeAttribute('inert');
-
       const imgEl  = dlg.querySelector('.lu-media');
-      const wrap   = dlg.querySelector('.lu-media-wrap');
       const title  = dlg.querySelector('.lu-title');
       const timeEl = dlg.querySelector('.lu-time');
       const desc   = dlg.querySelector('.lu-desc');
@@ -418,12 +411,13 @@
       // Bild
       const src = buildImgSrc(a.image);
       if (src){
+        const wrap = dlg.querySelector('.lu-media-wrap');
         wrap.style.display = '';
         imgEl.src = src;
         imgEl.alt = a.artist ? `Foto: ${a.artist}` : "Bandfoto";
         imgEl.onerror = ()=>{ wrap.style.display='none'; };
       } else {
-        wrap.style.display = 'none';
+        dlg.querySelector('.lu-media-wrap').style.display = 'none';
         imgEl.src = '';
         imgEl.alt = '';
       }
@@ -432,7 +426,7 @@
       timeEl.textContent = (a.start && a.end) ? `${a.start}–${a.end}` : (a.start || '');
 
       const rawDesc = a.description || "";
-      const normalized = rawDesc.replace(/\r\n?|\n|\\n/g, "\n");
+      the normalized = rawDesc.replace(/\r\n?|\n|\\n/g, "\n");
       const safe = escapeHtml(normalized).replace(/\n/g,"<br>");
       desc.innerHTML = safe;
 
@@ -502,34 +496,17 @@
     if (window.Papa) startLineup();
     else window.addEventListener('load', ()=>{ if (window.Papa) startLineup(); });
 
-    // ===== Dialog schließen (Backdrop, ESC, Button) =====
+    // Dialog schließen (Klick außerhalb, ESC, Close-Button)
     if (dlg){
-      // Backdrop/Outside: pointerdown → zuverlässig auf Mobile
-      dlg.addEventListener('pointerdown', (e)=>{
+      dlg.addEventListener('click', (e)=>{
         const card = dlg.querySelector('.lu-card');
         if (!card) return;
         const r = card.getBoundingClientRect();
         const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-        if (!inside) {
-          e.preventDefault();
-          dlg.close();
-          dlg.setAttribute('inert',''); // wieder inaktiv wenn zu
-        }
+        if (!inside) dlg.close();
       });
-
-      // Close‑Button
-      dlg.querySelector('.lu-close')?.addEventListener('click', ()=>{
-        dlg.close();
-        dlg.setAttribute('inert','');
-      });
-
-      // ESC
-      dlg.addEventListener('keydown', (e)=>{
-        if (e.key === 'Escape') {
-          dlg.close();
-          dlg.setAttribute('inert','');
-        }
-      });
+      dlg.querySelector('.lu-close')?.addEventListener('click', ()=>dlg.close());
+      dlg.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') dlg.close(); });
     }
   })();
   </script>
