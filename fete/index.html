@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap" rel="stylesheet">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="../styles.css?v=simple-banner" />
+  <link rel="stylesheet" href="/styles.css?v=simple-banner" />
 </head>
 <body class="fete-page">
 
@@ -296,7 +296,8 @@
   <script>
   (function(){
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRkYgQhBk53GOGABV_qzv3ZqjgSfR61ZH9_fX-uejRTUOQ4EtAgARUXXIayqaPKWRr5hBRMCH219-_j/pub?output=csv";
-    const IMG_BASE = "img/";
+    // Seite liegt unter /fete/, Bandfotos unter /fete/bandinfo/img/
+    const IMG_BASE = "bandinfo/img/";
 
     const root   = document.getElementById('lineupRoot');
     const errBox = document.getElementById('luError');
@@ -307,18 +308,16 @@
     const stripBOM = (s) => String(s ?? '').replace(/^\uFEFF/, '');
     const clean = (s) => stripBOM(String(s ?? '').trim());
 
-    // ---- Robust: Header normalisieren UND Fallbacks für description ----
     const normalizeKey = (k) => stripBOM(String(k||''))
       .toLowerCase().trim().replace(/\s+/g,'')
       .replace(/bandname|name|band/, 'artist')
-      .replace(/beschreibung|beschreib|desc|descriptiontext/, 'description')
+      .replace(/beschreibung|desc|descriptiontext/, 'description')
       .replace(/bildurl|bild|imageurl/, 'image')
       .replace(/^tag$/, 'day')
       .replace(/^zeit$|^time$/, 'start')
       .replace(/^startzeit$/, 'start')
       .replace(/^endzeit$/, 'end');
 
-    // Zeiten tolerant
     const parseTime = (t) => {
       const raw = clean(t);
       if (!raw) return null;
@@ -339,11 +338,29 @@
       return clean(dayRaw) || "Tag";
     };
 
+    // Bildpfad robust für /fete/bandinfo/img/
     function buildImgSrc(image){
-      const v = clean(image);
-      if (!v) return '';
-      if (/^https?:\/\//i.test(v) || v.startsWith('//')) return v;
-      return (IMG_BASE || '') + v.replace(/^\/+/, '');
+      const v0 = clean(image);
+      if (!v0) return '';
+      if (/^https?:\/\//i.test(v0) || v0.startsWith('//')) return v0;
+
+      // führende Slashes weg
+      let path = v0.replace(/^\/+/, '');
+      const low = path.toLowerCase();
+
+      // verschiedene mögliche Schreibweisen aus CSV normalisieren:
+      // /fete/bandinfo/img/..., fete/bandinfo/img/..., bandinfo/img/..., img/..., nur Dateiname
+      if (low.startsWith('fete/bandinfo/img/')) path = path.slice('fete/'.length);       // → bandinfo/img/...
+      if (low.startsWith('/fete/bandinfo/img/')) path = path.slice('/fete/'.length);     // defensiv
+      if (low.startsWith('fete/img/')) path = path.slice('fete/'.length);               // falls falsch eingetragen
+      if (!low.startsWith('bandinfo/img/') && !low.startsWith('img/')) {
+        path = (IMG_BASE || '') + path; // → bandinfo/img/filename.jpg
+      }
+
+      // Dateinamen encoden (Leerzeichen etc.)
+      path = path.split('/').map(encodeURIComponent).join('/');
+
+      return path;
     }
 
     function groupByDay(rows){
@@ -420,7 +437,7 @@
       title.textContent = a.artist || '';
       timeEl.textContent = (a.start && a.end) ? `${a.start}–${a.end}` : (a.start || '');
 
-      // Beschreibung: CRLF/CR/LF und *literales* \n → <br>, XSS-sicher
+      // Beschreibung mit Zeilenumbrüchen
       const rawDesc = a.description || "";
       const normalized = rawDesc.replace(/\r\n?|\n|\\n/g, "\n");
       const safe = escapeHtml(normalized).replace(/\n/g,"<br>");
@@ -428,24 +445,6 @@
 
       if (typeof dlg.showModal === 'function') dlg.showModal();
       else dlg.setAttribute('open','');
-    }
-
-    // --- Hilfsfunktion: finde bestmögliche Description-Spalte, falls Header abweicht ---
-    function extractDescription(origRow, normalizedRow){
-      // 1) Bevorzugt normalisierte Felder
-      if (normalizedRow.description != null && String(normalizedRow.description).trim() !== "") {
-        return normalizedRow.description;
-      }
-      // 2) Fallback: suche in Originalkeys alles, was "descr" enthält (z. B. "DeScription", "Beschreibung", "Bandbeschreibung")
-      let hit = "";
-      for (const k of Object.keys(origRow)){
-        const kk = String(k).toLowerCase().trim();
-        if (/(beschreib|descr)/.test(kk)) {
-          const v = origRow[k];
-          if (v != null && String(v).trim() !== "") { hit = v; break; }
-        }
-      }
-      return hit;
     }
 
     function startLineup(){
@@ -456,7 +455,6 @@
         complete: (res)=>{
           try {
             const rows = (res.data || []).map(orig=>{
-              // normalisierte Kopie
               const norm = {};
               Object.keys(orig).forEach(k=>{
                 norm[ normalizeKey(k) ] = orig[k];
@@ -467,14 +465,13 @@
               const start  = parseTime(norm.start);
               const end    = parseTime(norm.end);
               const image  = clean(norm.image);
-              const descriptionRaw = extractDescription(orig, norm);
-              const description = String(descriptionRaw ?? "");
+              const description = String(norm.description ?? "");
 
               if (!artist || !day) return null;
               return { artist, day, start, end, image, description };
             }).filter(Boolean);
 
-            // Lade-Placeholder entfernen
+            // Lade-Placeholder weg
             root.innerHTML = '';
 
             if (!rows.length){
@@ -504,7 +501,6 @@
       });
     }
 
-    // Start erst, wenn Papa vorhanden ist
     if (window.Papa) {
       startLineup();
     } else {
