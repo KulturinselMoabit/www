@@ -147,9 +147,10 @@ body {
    ===================================================================== */
 
 .fete-page {
-  --lineup-min: 1.8rem;
-  --lineup-vw:  5vw;
-  --lineup-max: 3rem;
+  /* Bands ~1/3 kleiner */
+  --lineup-min: 1.2rem;   /* vorher 1.8rem */
+  --lineup-vw:  3.3vw;    /* vorher 5vw */
+  --lineup-max: 2rem;     /* vorher 3rem */
   --lineup-row-gap: .6em;
 }
 
@@ -271,7 +272,7 @@ body {
   overflow-wrap: normal;
 }
 
-/* Buttons für Acts (unsichtbar, mit Hover/Focus-Underline in rot) */
+/* Klickfläche Bandname (unsichtbarer Button) + rote Hover-Unterline */
 .fete-page .lineup .acts li .lu-act {
   all: unset;
   cursor: pointer;
@@ -306,7 +307,7 @@ body {
 .fete-page .entry ul { list-style: none; margin: 0 0 1rem 0; padding: 0; }
 .fete-page .entry li { margin: .25rem 0; }
 
-/* Nur im Eintritt-Block: Überschrift zentrieren wie Line-up, Breite = Text */
+/* Überschrift "Eintritt" zentriert wie "Line-Up", Linie nur Textbreite */
 .fete-page .entry .section-title{
   display: block;
   width: max-content;
@@ -314,15 +315,15 @@ body {
   text-align: center;
 }
 
-/* ---------- Modal / Bottom-Sheet (nur Fête) ---------- */
+/* ---------- Schlichtes Modal (nur Fête) ---------- */
 .fete-page .lu-dialog::backdrop{
-  background: rgba(0,0,0,.45);
+  background: rgba(0,0,0,.4);
 }
 .fete-page .lu-card{
   border: none;
   padding: 0;
   background: #fff;
-  border-radius: 16px;
+  border-radius: 10px;
   max-width: min(700px, 92vw);
   overflow: hidden;
 }
@@ -336,15 +337,15 @@ body {
   width: 100%; height: 100%; object-fit: cover; display: block;
 }
 .fete-page .lu-content{
-  padding: 1rem 1rem 1.25rem;
+  padding: 1rem 1rem 1.2rem;
   color: var(--primary);
 }
 .fete-page .lu-title{
-  font-weight: 800; font-size: clamp(1.25rem, 3.6vw, 1.6rem);
-  margin-bottom: .35rem;
+  font-weight: 800; font-size: clamp(1.2rem, 3.4vw, 1.5rem);
+  margin-bottom: .3rem;
 }
 .fete-page .lu-time{
-  font-weight: 700; opacity: .85; margin-bottom: .6rem;
+  font-weight: 700; opacity: .85; margin-bottom: .5rem;
 }
 .fete-page .lu-desc{
   line-height: 1.35;
@@ -359,12 +360,9 @@ body {
 }
 .fete-page .lu-close:focus-visible{ outline: 2px solid var(--highlight); outline-offset: 2px; }
 
-/* Mobile Bottom-Sheet */
+/* Mobile */
 @media (max-width: 768px){
-  .fete-page .lu-card{
-    width: 100vw; max-width: none; border-radius: 16px 16px 0 0;
-    position: fixed; left: 50%; bottom: 0; transform: translateX(-50%);
-  }
+  .fete-page .lu-card{ max-width: 96vw; border-radius: 10px; }
 }
 
 /* Mobile-Polish nur für Fête */
