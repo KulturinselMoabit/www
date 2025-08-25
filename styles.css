@@ -148,9 +148,9 @@ body {
 
 .fete-page {
   /* Bands ~1/3 kleiner */
-  --lineup-min: 1.2rem;   /* vorher 1.8rem */
-  --lineup-vw:  3.3vw;    /* vorher 5vw */
-  --lineup-max: 2rem;     /* vorher 3rem */
+  --lineup-min: 1.2rem;
+  --lineup-vw:  3.33vw;
+  --lineup-max: 2rem;
   --lineup-row-gap: .6em;
 }
 
@@ -262,23 +262,22 @@ body {
 }
 .fete-page .lineup .acts li{
   font-family: "Rubik Dirt", "Montserrat", sans-serif;
-  text-transform: uppercase; letter-spacing: .03em; line-height: .95;
+  text-transform: uppercase; letter-spacing: .03em; line-height: 1.15;
   color: var(--primary);
   font-size: clamp(var(--lineup-min), var(--lineup-vw), var(--lineup-max));
-  padding: 0 .35em;      /* sichtbarer Abstand vor & nach dem Namen */
-  white-space: normal;
-  hyphens: none;         /* keine automatische Silbentrennung */
-  word-break: keep-all;  /* ganze Wörter umbrechen */
-  overflow-wrap: normal;
+  margin: 0 .8em;                 /* Abstand links/rechts */
+  overflow-wrap: normal;          /* keine automatische Trennung */
+  word-break: keep-all;           /* ganze Wörter umbrechen */
+  hyphens: manual;                /* nur manuelle Trennung */
 }
 
-/* Klickfläche Bandname (unsichtbarer Button) + rote Hover-Unterline */
-.fete-page .lineup .acts li .lu-act {
-  all: unset;
-  cursor: pointer;
-  position: relative;
+/* Klickfläche Bandname (wie Text) + rote Hover-Underline */
+.fete-page .lineup .acts .lu-act{
+  background: none; border: none; padding: 0; margin: 0;
+  font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit;
+  cursor: pointer; position: relative;
 }
-.fete-page .lineup .acts li .lu-act::after {
+.fete-page .lineup .acts .lu-act::after{
   content: '';
   position: absolute;
   left: 0; right: 0; bottom: -0.15em;
@@ -288,12 +287,16 @@ body {
   transform-origin: center;
   transition: transform .25s ease;
 }
-.fete-page .lineup .acts li .lu-act:hover::after,
-.fete-page .lineup .acts li .lu-act:focus-visible::after {
+.fete-page .lineup .acts .lu-act:hover::after,
+.fete-page .lineup .acts .lu-act:focus-visible::after{
   transform: scaleX(1);
 }
+.fete-page .lineup .acts .lu-act:focus-visible{
+  outline: 2px solid var(--highlight);
+  outline-offset: 2px;
+}
 
-/* KEINE Punkte/Trenner zwischen Bands */
+/* Keine Punkte zwischen Bands */
 .fete-page .lineup .acts li + li::before{ content: none; }
 
 @media (max-width: 768px) {
@@ -306,8 +309,7 @@ body {
 .fete-page .entry p { margin-bottom: .75rem; }
 .fete-page .entry ul { list-style: none; margin: 0 0 1rem 0; padding: 0; }
 .fete-page .entry li { margin: .25rem 0; }
-
-/* Überschrift "Eintritt" zentriert wie "Line-Up", Linie nur Textbreite */
+/* "Eintritt" zentriert mit Linie in Textbreite */
 .fete-page .entry .section-title{
   display: block;
   width: max-content;
@@ -315,54 +317,61 @@ body {
   text-align: center;
 }
 
-/* ---------- Schlichtes Modal (nur Fête) ---------- */
-.fete-page .lu-dialog::backdrop{
-  background: rgba(0,0,0,.4);
-}
-.fete-page .lu-card{
+/* ================= Modal / Bottom-Sheet (nur Fête) ================== */
+.fete-page .lu-dialog {
   border: none;
   padding: 0;
-  background: #fff;
-  border-radius: 10px;
-  max-width: min(700px, 92vw);
-  overflow: hidden;
+  width: min(92vw, 720px);
+  max-width: 100%;
+  background: transparent;
 }
-.fete-page .lu-media-wrap{
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  background: #f2f2f2;
-  overflow: hidden;
+.fete-page .lu-dialog::backdrop {
+  background: rgba(0,0,0,.45);
 }
-.fete-page .lu-media{
-  width: 100%; height: 100%; object-fit: cover; display: block;
-}
-.fete-page .lu-content{
-  padding: 1rem 1rem 1.2rem;
+.fete-page .lu-card {
+  background: var(--bg);
   color: var(--primary);
+  border-radius: 14px;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  max-height: 85vh;
 }
-.fete-page .lu-title{
-  font-weight: 800; font-size: clamp(1.2rem, 3.4vw, 1.5rem);
-  margin-bottom: .3rem;
+.fete-page .lu-close {
+  position: absolute;
+  top: .5rem; right: .75rem;
+  background: rgba(255,255,255,.9);
+  border: none; border-radius: 999px;
+  width: 32px; height: 32px; line-height: 32px;
+  font-size: 20px; font-weight: 800; color: var(--primary);
+  cursor: pointer;
 }
-.fete-page .lu-time{
-  font-weight: 700; opacity: .85; margin-bottom: .5rem;
+.fete-page .lu-media-wrap { display: none; background:#ddd; }
+.fete-page .lu-media {
+  display: block; width: 100%; height: auto;
+  aspect-ratio: 16/9; object-fit: cover;
 }
-.fete-page .lu-desc{
+.fete-page .lu-content { padding: 1rem 1rem 1.25rem; }
+.fete-page .lu-title {
+  font-size: clamp(1.2rem, 3.5vw, 1.6rem);
+  font-weight: 800; margin-bottom: .4rem;
+}
+.fete-page .lu-time {
+  font-weight: 700; margin-bottom: .6rem;
+}
+.fete-page .lu-desc {
+  white-space: pre-wrap;
   line-height: 1.35;
-  word-break: normal;
-  overflow-wrap: anywhere;
 }
-.fete-page .lu-close{
-  all: unset;
-  position: absolute; top: .35rem; right: .6rem;
-  width: 2rem; height: 2rem; text-align: center; line-height: 2rem;
-  font-size: 1.25rem; font-weight: 800; cursor: pointer; color: var(--primary);
-}
-.fete-page .lu-close:focus-visible{ outline: 2px solid var(--highlight); outline-offset: 2px; }
 
-/* Mobile */
+/* Mobile: Bottom-Sheet Look */
 @media (max-width: 768px){
-  .fete-page .lu-card{ max-width: 96vw; border-radius: 10px; }
+  .fete-page .lu-dialog { width: 100vw; margin: 0; }
+  .fete-page .lu-card {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    max-height: 90vh;
+  }
 }
 
 /* Mobile-Polish nur für Fête */
