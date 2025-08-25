@@ -384,6 +384,16 @@
       return line;
     }
 
+    // Sicheres HTML-Escaping für Beschreibung (mit Zeilenumbrüchen)
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+    }
+
     function openDialog(a){
       const dlg = document.getElementById('luDialog');
       if (!dlg) return;
@@ -393,6 +403,7 @@
       const timeEl = dlg.querySelector('.lu-time');
       const desc   = dlg.querySelector('.lu-desc');
 
+      // Bild
       const src = buildImgSrc(a.image);
       if (src){
         imgEl.src = src;
@@ -406,7 +417,10 @@
 
       title.textContent = a.artist || '';
       timeEl.textContent = (a.start && a.end) ? `${a.start}–${a.end}` : (a.start || '');
-      desc.textContent = a.description || '';
+
+      // Beschreibung mit Zeilenumbrüchen sicher rendern
+      const safe = escapeHtml(a.description || "").replace(/\n/g,"<br>");
+      desc.innerHTML = safe;
 
       if (typeof dlg.showModal === 'function') dlg.showModal();
       else dlg.setAttribute('open','');
@@ -435,6 +449,7 @@
               return { artist, day, start, end, image, description };
             }).filter(Boolean);
 
+            // Lade-Placeholder entfernen
             root.innerHTML = '';
 
             if (!rows.length){
@@ -464,7 +479,7 @@
       });
     }
 
-    // Sicherstellen, dass Papa vorhanden ist:
+    // Start erst, wenn Papa vorhanden ist
     if (window.Papa) {
       startLineup();
     } else {
