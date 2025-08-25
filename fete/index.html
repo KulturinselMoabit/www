@@ -298,9 +298,9 @@
     // Feste Labels für Day-Tags inkl. Uhrzeit
     const DAY_LABELS = {
       "fr": "FR. 29. AUGUST · ab 14 Uhr",
+      "sa": "SA. 30. AUGUST · ab 12 Uhr",
       "fri": "FR. 29. AUGUST · ab 14 Uhr",
       "freitag": "FR. 29. AUGUST · ab 14 Uhr",
-      "sa": "SA. 30. AUGUST · ab 12 Uhr",
       "sam": "SA. 30. AUGUST · ab 12 Uhr",
       "samstag": "SA. 30. AUGUST · ab 12 Uhr"
     };
@@ -326,11 +326,13 @@
       .replace('bild','image')
       .replace('tag','day')
       .replace('startzeit','start')
-      .replace('endzeit','end');
+      .replace('endzeit','end')
+      .replace('time','start'); // <- wichtig für deine CSV
 
     const parseTime = (t) => {
       if (!t) return null;
-      const m = String(t).trim().match(/^(\d{1,2})[:.](\d{2})$/);
+      const s = String(t).trim().replace('.',':');
+      const m = s.match(/^(\d{1,2})[:](\d{2})$/);
       if (!m) return null;
       const hh = parseInt(m[1],10), mm = parseInt(m[2],10);
       if (hh<0||hh>23||mm<0||mm>59) return null;
@@ -343,7 +345,6 @@
       rows.forEach(r=>{
         const rawDay = (r.day || "").toString().trim();
         if (!rawDay) return;
-        const key = rawDay.toLowerCase();
         if (!map[rawDay]){
           map[rawDay] = [];
           order.push(rawDay);
@@ -457,7 +458,6 @@
 
             // gruppieren & sortieren pro Tag nach Startzeit
             const {order, map} = groupByDay(rows);
-            // Reihenfolge wie im CSV: 'order' enthält raw day labels in first-appearance order
             order.forEach(dayRaw=>{
               const acts = map[dayRaw]
                 .sort((a,b)=>{
@@ -480,8 +480,9 @@
       const dlg = document.getElementById('luDialog');
       if (dlg){
         dlg.addEventListener('click', (e)=>{
-          const rect = dlg.querySelector('.lu-card')?.getBoundingClientRect();
-          if (!rect) return;
+          const card = dlg.querySelector('.lu-card');
+          if (!card) return;
+          const rect = card.getBoundingClientRect();
           const inside = (e.clientX >= rect.left && e.clientX <= rect.right &&
                           e.clientY >= rect.top  && e.clientY <= rect.bottom);
           if (!inside) dlg.close();
