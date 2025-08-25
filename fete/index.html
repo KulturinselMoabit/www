@@ -384,7 +384,7 @@
       return line;
     }
 
-    // Sicheres HTML-Escaping für Beschreibung (mit Zeilenumbrüchen)
+    // Sicheres HTML-Escaping
     function escapeHtml(s){
       return String(s ?? "")
         .replace(/&/g,"&amp;")
@@ -418,8 +418,10 @@
       title.textContent = a.artist || '';
       timeEl.textContent = (a.start && a.end) ? `${a.start}–${a.end}` : (a.start || '');
 
-      // Beschreibung mit Zeilenumbrüchen sicher rendern
-      const safe = escapeHtml(a.description || "").replace(/\n/g,"<br>");
+      // Beschreibung: CRLF/CR/LF → <br>, XSS-sicher
+      const rawDesc = a.description || "";
+      const normalized = rawDesc.replace(/\r\n?/g, "\n");
+      const safe = escapeHtml(normalized).replace(/\n/g,"<br>");
       desc.innerHTML = safe;
 
       if (typeof dlg.showModal === 'function') dlg.showModal();
