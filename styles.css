@@ -317,23 +317,24 @@ body {
 }
 
 /* ================= Modal / Bottom-Sheet (nur Fête) ================== */
-/* WICHTIG: geschlossen unsichtbar */
+
+/* 1) Geschlossen unsichtbar – Fix gegen „Geister-Popup“ */
 .fete-page .lu-dialog:not([open]) { display: none; }
 
-/* Geöffnet: Vollflächen-Overlay, zentriert (wie bei der ersten Version) */
+/* 2) Geöffnet: Vollflächen-Overlay, mittig (Desktop) */
 .fete-page .lu-dialog[open]{
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin: 0;
   position: fixed;
-  inset: 0;                 /* volle Viewport-Fläche */
-  display: grid;            /* zentriert am Desktop */
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  display: grid;
   place-items: center;
+  z-index: 10000; /* sicher vor allem anderen */
 }
 .fete-page .lu-dialog[open]::backdrop { background: rgba(0,0,0,.45); }
 
-/* Die sichtbare Box – identische Optik wie „damals“ */
+/* 3) Card – wie in deiner Lieblingsversion */
 .fete-page .lu-card {
   background: var(--bg);
   color: var(--primary);
@@ -341,39 +342,31 @@ body {
   border-radius: 14px;
   width: min(92vw, 720px);
   max-width: 100%;
-  max-height: 85vh;         /* begrenzen */
+  max-height: 85vh;
   display: grid;
   grid-template-rows: auto 1fr;
-  overflow: hidden;         /* Medien fixieren, Inhalt scrollt */
+  overflow: hidden;   /* Bild fix, Text scrollt */
   position: relative;
 }
 
-/* Bild-Bereich */
+/* Bildbereich oben (wird verborgen, wenn kein Bild) */
 .fete-page .lu-media-wrap { display: none; background:#ddd; }
 .fete-page .lu-media {
   display: block; width: 100%; height: auto;
   aspect-ratio: 16/9; object-fit: cover;
 }
 
-/* Textbereich – SCROLLBAR für lange Inhalte */
+/* Scrollbarer Inhalt */
 .fete-page .lu-content {
   padding: 1rem 1rem 1.25rem;
-  overflow: auto;                 /* Scrollbar */
+  overflow: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable both-edges;
 }
 
-.fete-page .lu-title {
-  font-size: clamp(1.2rem, 3.5vw, 1.6rem);
-  font-weight: 800; margin-bottom: .4rem;
-}
-.fete-page .lu-time {
-  font-weight: 700; margin-bottom: .6rem;
-}
-.fete-page .lu-desc {
-  white-space: pre-wrap;
-  line-height: 1.35;
-}
+.fete-page .lu-title { font-size: clamp(1.2rem, 3.5vw, 1.6rem); font-weight: 800; margin-bottom: .4rem; }
+.fete-page .lu-time  { font-weight: 700; margin-bottom: .6rem; }
+.fete-page .lu-desc  { white-space: pre-wrap; line-height: 1.35; }
 
 /* Close-Button */
 .fete-page .lu-close{
@@ -386,12 +379,12 @@ body {
 }
 .fete-page .lu-close:focus-visible{ outline: 2px solid var(--highlight); outline-offset: 2px; }
 
-/* Mobile: Bottom-Sheet (wie beim ersten Mal) */
+/* 4) Mobile: Bottom-Sheet mit innerem Scroll (wie damals) */
 @media (max-width: 768px){
-  .fete-page .lu-dialog[open]{ place-items: end center; }  /* unten andocken */
+  .fete-page .lu-dialog[open]{ place-items: end center; } /* unten andocken */
   .fete-page .lu-card{
     width: 100vw;
-    max-height: 90vh;         /* höher auf kleinen Screens */
+    max-height: 90vh;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
