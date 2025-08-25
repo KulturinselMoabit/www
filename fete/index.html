@@ -289,15 +289,13 @@
   })();
   </script>
 
-  <!-- PapaParse (CDN) – SRI entfernt, damit es sicher lädt -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" crossorigin="anonymous"></script>
+  <!-- PapaParse (CDN) – ohne SRI & crossorigin -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <!-- JS: Dynamisches Line-up aus Google Sheets CSV -->
   <script>
   (function(){
-    // CSV genau von deinem Link:
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRkYgQhBk53GOGABV_qzv3ZqjgSfR61ZH9_fX-uejRTUOQ4EtAgARUXXIayqaPKWRr5hBRMCH219-_j/pub?output=csv";
-    // Bilder im Unterordner /fete/img/
     const IMG_BASE = "img/";
 
     const root   = document.getElementById('lineupRoot');
@@ -306,11 +304,9 @@
 
     const showError = (msg) => { if (errBox){ errBox.style.display=''; errBox.textContent = msg; }};
 
-    // Helfer: BOM entfernen & normalisieren
     const stripBOM = (s) => String(s ?? '').replace(/^\uFEFF/, '');
     const clean = (s) => stripBOM(String(s ?? '').trim());
 
-    // Header-Key robust normalisieren
     const normalizeKey = (k) => stripBOM(String(k||''))
       .toLowerCase().trim().replace(/\s+/g,'')
       .replace(/bandname|name|band/, 'artist')
@@ -321,7 +317,6 @@
       .replace(/^startzeit$/, 'start')
       .replace(/^endzeit$/, 'end');
 
-    // Zeiten tolerant: "14", "14.00", "14:00"
     const parseTime = (t) => {
       const raw = clean(t);
       if (!raw) return null;
@@ -335,7 +330,6 @@
       return String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
     };
 
-    // Day-Label fix für FR/SA
     const labelForDay = (dayRaw) => {
       const d = clean(dayRaw).toLowerCase();
       if (/^(fr|fri|freitag|fr\.|friday)$/.test(d)) return "FR. 29. AUGUST · ab 14 Uhr";
@@ -399,7 +393,6 @@
       const timeEl = dlg.querySelector('.lu-time');
       const desc   = dlg.querySelector('.lu-desc');
 
-      // Bild
       const src = buildImgSrc(a.image);
       if (src){
         imgEl.src = src;
@@ -419,58 +412,67 @@
       else dlg.setAttribute('open','');
     }
 
-    // Render-Start
-    Papa.parse(CSV_URL, {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      complete: (res)=>{
-        try {
-          // Header robust normalisieren (auch mit BOM)
-          const rows = (res.data || []).map(orig=>{
-            const row = {};
-            Object.keys(orig).forEach(k=>{
-              row[ normalizeKey(k) ] = orig[k];
+    function startLineup(){
+      Papa.parse(CSV_URL, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: (res)=>{
+          try {
+            const rows = (res.data || []).map(orig=>{
+              const row = {};
+              Object.keys(orig).forEach(k=>{
+                row[ normalizeKey(k) ] = orig[k];
+              });
+              const artist = clean(row.artist || row.name);
+              const day    = clean(row.day);
+              const start  = parseTime(row.start);
+              const end    = parseTime(row.end);
+              const image  = clean(row.image);
+              const description = String(row.description ?? '');
+
+              if (!artist || !day) return null;
+              return { artist, day, start, end, image, description };
+            }).filter(Boolean);
+
+            root.innerHTML = '';
+
+            if (!rows.length){
+              showError('Keine Einträge in der CSV gefunden.');
+              return;
+            }
+
+            const {order, map} = groupByDay(rows);
+            order.forEach(dayRaw=>{
+              const acts = map[dayRaw].sort((a,b)=>{
+                if (a.start && b.start) return a.start.localeCompare(b.start);
+                if (a.start) return -1;
+                if (b.start) return 1;
+                return a.artist.localeCompare(b.artist);
+              });
+              root.appendChild( renderDayBlock(dayRaw, acts) );
             });
-            const artist = clean(row.artist || row.name);
-            const day    = clean(row.day);
-            const start  = parseTime(row.start);
-            const end    = parseTime(row.end);
-            const image  = clean(row.image);
-            const description = String(row.description ?? '');
-
-            if (!artist || !day) return null; // zwingend
-            return { artist, day, start, end, image, description };
-          }).filter(Boolean);
-
-          // Container leeren (Ladeanzeige weg)
-          root.innerHTML = '';
-
-          if (!rows.length){
-            showError('Keine Einträge in der CSV gefunden.');
-            return;
+          } catch(e){
+            console.error(e);
+            showError('Fehler beim Verarbeiten der CSV.');
           }
-
-          const {order, map} = groupByDay(rows);
-          order.forEach(dayRaw=>{
-            const acts = map[dayRaw].sort((a,b)=>{
-              if (a.start && b.start) return a.start.localeCompare(b.start);
-              if (a.start) return -1;
-              if (b.start) return 1;
-              return a.artist.localeCompare(b.artist);
-            });
-            root.appendChild( renderDayBlock(dayRaw, acts) );
-          });
-        } catch(e){
-          console.error(e);
-          showError('Fehler beim Verarbeiten der CSV.');
+        },
+        error: (err)=>{
+          console.error(err);
+          showError('CSV konnte nicht geladen werden.');
         }
-      },
-      error: (err)=>{
-        console.error(err);
-        showError('CSV konnte nicht geladen werden.');
-      }
-    });
+      });
+    }
+
+    // Sicherstellen, dass Papa vorhanden ist:
+    if (window.Papa) {
+      startLineup();
+    } else {
+      window.addEventListener('load', ()=>{
+        if (window.Papa) startLineup();
+        else showError('PapaParse wurde nicht geladen (CDN blockiert?).');
+      });
+    }
 
     // Dialog schließen (Klick außerhalb, ESC)
     const dlg = document.getElementById('luDialog');
