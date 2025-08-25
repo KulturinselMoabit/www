@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap" rel="stylesheet">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="../styles.css?v=fete-dialog-fix-localcsv" />
+  <link rel="stylesheet" href="../styles.css?v=fete-dialog-fix-1" />
 </head>
 <body class="fete-page">
 
@@ -200,7 +200,7 @@
         v.preload='metadata'; v.muted=true; v.playsInline=true; v.setAttribute('playsinline',''); v.loop=true;
         const ok=()=>{ cleanup(); resolve({ok:true, node:v}); };
         const err=()=>{ cleanup(); resolve({ok:false}); };
-        function cleanup(){ v.removeEventListener('loadedmetadata', ok); v.removeEventListener('error', err); }
+        function cleanup(){ v.removeEventListener('loadedmetadata, ok'); v.removeEventListener('error', err); }
         v.addEventListener('loadedmetadata', ok);
         v.addEventListener('error', err);
         v.src = url;
@@ -290,15 +290,14 @@
   })();
   </script>
 
-  <!-- PapaParse (CDN) -->
+  <!-- PapaParse (CDN) – ohne SRI & crossorigin -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-  <!-- JS: Dynamisches Line-up aus lokaler CSV -->
+  <!-- JS: Dynamisches Line-up aus lokaler CSV (gleiche Struktur wie vorher) -->
   <script>
   (function(){
-    // Neu: lokale CSV im selben Ordner (/fete/lineup.csv)
-    const CSV_URL = "lineup.csv";
-    const IMG_BASE = "bandinfo/img/"; // relativ zu /fete/
+    const CSV_URL = "lineup.csv";          // <- einzige Änderung: lokale Datei
+    const IMG_BASE = "bandinfo/img/";      // relativ zu /fete/
 
     const root   = document.getElementById('lineupRoot');
     const errBox = document.getElementById('luError');
@@ -409,6 +408,7 @@
       const timeEl = dlg.querySelector('.lu-time');
       const desc   = dlg.querySelector('.lu-desc');
 
+      // Bild
       const src = buildImgSrc(a.image);
       if (src){
         const wrap = dlg.querySelector('.lu-media-wrap');
