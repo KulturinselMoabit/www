@@ -261,10 +261,15 @@ body {
 }
 .fete-page .lineup .acts li{
   font-family: "Rubik Dirt", "Montserrat", sans-serif;
-  text-transform: uppercase; letter-spacing: .03em; line-height: .9;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  line-height: 1.15;              /* größerer Zeilenabstand */
   color: var(--primary);
   font-size: clamp(var(--lineup-min), var(--lineup-vw), var(--lineup-max));
-  margin: 0 .4em; /* Abstände statt Punkte */
+  margin: 0 .8em;                 /* mehr Leerraum links/rechts */
+  overflow-wrap: normal;          /* keine automatische Trennung */
+  word-break: keep-all;           /* ganzes Wort umbrechen */
+  hyphens: manual;                /* nur manuelle Trennung */
 }
 .fete-page .lineup .acts li + li::before{
   content: none; /* keine Punkte mehr */
@@ -304,7 +309,7 @@ body {
 }
 .fete-page { overflow-x: hidden; }
 .fete-page .lineup .acts { padding-inline: .25rem; }
-.fete-page .lineup .acts li{ overflow-wrap: anywhere; word-break: break-word; hyphens: auto; }
+.fete-page .lineup .acts li{ /* schon oben angepasst */ }
 .fete-page .fete-slider { overflow: hidden; }
 .fete-page .fete-dots { padding: 0 .35rem; }
 .fete-page .fete-control { width: 2rem; height: 2rem; line-height: 2rem; }
