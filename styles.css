@@ -265,10 +265,10 @@ body {
   text-transform: uppercase; letter-spacing: .03em; line-height: 1.15;
   color: var(--primary);
   font-size: clamp(var(--lineup-min), var(--lineup-vw), var(--lineup-max));
-  margin: 0 .8em;                 /* Abstand links/rechts */
-  overflow-wrap: normal;          /* keine automatische Trennung */
-  word-break: keep-all;           /* ganze Wörter umbrechen */
-  hyphens: manual;                /* nur manuelle Trennung */
+  margin: 0 .8em;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: manual;
 }
 
 /* Klickfläche Bandname (wie Text) + rote Hover-Underline */
@@ -309,6 +309,7 @@ body {
 .fete-page .entry p { margin-bottom: .75rem; }
 .fete-page .entry ul { list-style: none; margin: 0 0 1rem 0; padding: 0; }
 .fete-page .entry li { margin: .25rem 0; }
+/* "Eintritt" zentriert mit Linie in Textbreite */
 .fete-page .entry .section-title{
   display: block;
   width: max-content;
@@ -318,10 +319,10 @@ body {
 
 /* ================= Modal / Bottom-Sheet (nur Fête) ================== */
 
-/* 1) Geschlossen unsichtbar – Fix gegen „Geister-Popup“ */
-.fete-page .lu-dialog:not([open]) { display: none; }
+/* Geschlossen: komplett unsichtbar (verhindert „Geister‑Popup“) */
+.fete-page .lu-dialog:not([open]) { display: none !important; }
 
-/* 2) Geöffnet: Vollflächen-Overlay, mittig (Desktop) */
+/* Geöffnet: Vollflächen-Overlay, mittig (Desktop) */
 .fete-page .lu-dialog[open]{
   position: fixed;
   inset: 0;
@@ -330,11 +331,11 @@ body {
   background: transparent;
   display: grid;
   place-items: center;
-  z-index: 10000; /* sicher vor allem anderen */
+  z-index: 10000;
 }
 .fete-page .lu-dialog[open]::backdrop { background: rgba(0,0,0,.45); }
 
-/* 3) Card – wie in deiner Lieblingsversion */
+/* Die sichtbare Box */
 .fete-page .lu-card {
   background: var(--bg);
   color: var(--primary);
@@ -349,7 +350,7 @@ body {
   position: relative;
 }
 
-/* Bildbereich oben (wird verborgen, wenn kein Bild) */
+/* Bildbereich (wird per JS ein-/ausgeblendet) */
 .fete-page .lu-media-wrap { display: none; background:#ddd; }
 .fete-page .lu-media {
   display: block; width: 100%; height: auto;
@@ -363,7 +364,6 @@ body {
   -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable both-edges;
 }
-
 .fete-page .lu-title { font-size: clamp(1.2rem, 3.5vw, 1.6rem); font-weight: 800; margin-bottom: .4rem; }
 .fete-page .lu-time  { font-weight: 700; margin-bottom: .6rem; }
 .fete-page .lu-desc  { white-space: pre-wrap; line-height: 1.35; }
@@ -379,9 +379,9 @@ body {
 }
 .fete-page .lu-close:focus-visible{ outline: 2px solid var(--highlight); outline-offset: 2px; }
 
-/* 4) Mobile: Bottom-Sheet mit innerem Scroll (wie damals) */
+/* Mobile: Bottom-Sheet */
 @media (max-width: 768px){
-  .fete-page .lu-dialog[open]{ place-items: end center; } /* unten andocken */
+  .fete-page .lu-dialog[open]{ place-items: end center; }
   .fete-page .lu-card{
     width: 100vw;
     max-height: 90vh;
