@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap" rel="stylesheet">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="../styles.css?v=fete-dialog-fix-1" />
+  <link rel="stylesheet" href="../styles.css?v=fete-dialog-fix-localcsv" />
 </head>
 <body class="fete-page">
 
@@ -290,13 +290,14 @@
   })();
   </script>
 
-  <!-- PapaParse (CDN) – ohne SRI & crossorigin -->
+  <!-- PapaParse (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-  <!-- JS: Dynamisches Line-up aus Google Sheets CSV -->
+  <!-- JS: Dynamisches Line-up aus lokaler CSV -->
   <script>
   (function(){
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRkYgQhBk53GOGABV_qzv3ZqjgSfR61ZH9_fX-uejRTUOQ4EtAgARUXXIayqaPKWRr5hBRMCH219-_j/pub?output=csv";
+    // Neu: lokale CSV im selben Ordner (/fete/lineup.csv)
+    const CSV_URL = "lineup.csv";
     const IMG_BASE = "bandinfo/img/"; // relativ zu /fete/
 
     const root   = document.getElementById('lineupRoot');
@@ -408,7 +409,6 @@
       const timeEl = dlg.querySelector('.lu-time');
       const desc   = dlg.querySelector('.lu-desc');
 
-      // Bild
       const src = buildImgSrc(a.image);
       if (src){
         const wrap = dlg.querySelector('.lu-media-wrap');
