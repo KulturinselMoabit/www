@@ -90,6 +90,7 @@
 
             <!-- Dynamisch erzeugter Inhalt -->
             <div id="lineupRoot" aria-live="polite"></div>
+            <div id="luError" style="margin-top:.5rem;font-weight:700;color:#FC411F;display:none;"></div>
           </div>
         </section>
         <!-- ===== /LINE-UP ===== -->
@@ -292,20 +293,24 @@
   <!-- JS: Dynamisches Line-up aus Google Sheets CSV -->
   <script>
   (function(){
+    // >>> HIER WIRD GENAU DEIN LINK VERWENDET <<<
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRkYgQhBk53GOGABV_qzv3ZqjgSfR61ZH9_fX-uejRTUOQ4EtAgARUXXIayqaPKWRr5hBRMCH219-_j/pub?output=csv";
-    const IMG_BASE = ""; // z.B. "/assets/lineup/"; leer lassen, wenn CSV Voll-URLs liefert
+    // Deine Bilder liegen in /img relativ zur Seite:
+    const IMG_BASE = "img/"; // ACHTUNG: ohne führenden Slash, damit es relativ zum /fete/ Ordner funktioniert
 
-    // Feste Labels für Day-Tags inkl. Uhrzeit
-    const DAY_LABELS = {
-      "fr": "FR. 29. AUGUST · ab 14 Uhr",
-      "sa": "SA. 30. AUGUST · ab 12 Uhr",
-      "fri": "FR. 29. AUGUST · ab 14 Uhr",
-      "freitag": "FR. 29. AUGUST · ab 14 Uhr",
-      "sam": "SA. 30. AUGUST · ab 12 Uhr",
-      "samstag": "SA. 30. AUGUST · ab 12 Uhr"
-    };
+    // Day-Label-Erweiterung: Wenn CSV 'FR'/'Freitag' etc. enthält, hängen wir die Startzeit-Angabe dran.
+    function labelForDay(dayRaw){
+      const d = (dayRaw||"").toString().trim().toLowerCase();
+      const isFri = /^(fr|fri|freitag|fr\.|friday)/.test(d);
+      const isSat = /^(sa|sam|samstag|sa\.|saturday)/.test(d);
+      if (isFri) return "FR. 29. AUGUST · ab 14 Uhr";
+      if (isSat) return "SA. 30. AUGUST · ab 12 Uhr";
+      // sonst: Original anzeigen (falls du eigene Texte im CSV hast)
+      return dayRaw;
+    }
 
     const root = document.getElementById('lineupRoot');
+    const errBox = document.getElementById('luError');
     if (!root) return;
 
     const esc = (s) => {
@@ -327,11 +332,14 @@
       .replace('tag','day')
       .replace('startzeit','start')
       .replace('endzeit','end')
-      .replace('time','start'); // <- wichtig für deine CSV
+      .replace('time','start'); // <- deine CSV nutzt 'time'
 
     const parseTime = (t) => {
-      if (!t) return null;
-      const s = String(t).trim().replace('.',':');
+      if (t == null) return null;
+      const raw = String(t).trim();
+      if (!raw) return null;
+      // akzeptiere "14", "14.00", "14:00"
+      const s = raw.includes(':') ? raw : raw.replace('.',':') + (raw.includes(':') || raw.includes('.') ? '' : ':00');
       const m = s.match(/^(\d{1,2})[:](\d{2})$/);
       if (!m) return null;
       const hh = parseInt(m[1],10), mm = parseInt(m[2],10);
@@ -359,13 +367,12 @@
       const trimmed = String(image).trim();
       if (!trimmed) return "";
       if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('//')) return trimmed;
-      return (IMG_BASE || "") + trimmed;
+      // relativ aus /fete/ nach /fete/img/...
+      return (IMG_BASE || "") + trimmed.replace(/^\/+/, '');
     }
 
     function renderDayBlock(dayRaw, acts){
-      // Day-Tag mit festen Labels, sonst Original-Text
-      const key = dayRaw.toLowerCase();
-      const label = DAY_LABELS[key] || esc(dayRaw);
+      const label = labelForDay(dayRaw);
 
       const line = document.createElement('div');
       line.className = 'line';
@@ -429,6 +436,12 @@
       }
     }
 
+    function showError(msg){
+      if (!errBox) return;
+      errBox.style.display = '';
+      errBox.textContent = msg;
+    }
+
     (function init(){
       Papa.parse(CSV_URL, {
         download: true,
@@ -456,6 +469,11 @@
               })
               .filter(Boolean);
 
+            if (!rows.length){
+              showError("Keine Einträge in der CSV gefunden.");
+              return;
+            }
+
             // gruppieren & sortieren pro Tag nach Startzeit
             const {order, map} = groupByDay(rows);
             order.forEach(dayRaw=>{
@@ -471,9 +489,13 @@
             });
           } catch(e){
             console.error(e);
+            showError("Fehler beim Verarbeiten der CSV.");
           }
         },
-        error: (err)=>{ console.error(err); }
+        error: (err)=>{
+          console.error(err);
+          showError("CSV konnte nicht geladen werden.");
+        }
       });
 
       // Dialog schließen
