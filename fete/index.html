@@ -89,7 +89,9 @@
             <div class="lineup-heading">Line-Up</div>
 
             <!-- Dynamisch erzeugter Inhalt -->
-            <div id="lineupRoot" aria-live="polite"></div>
+            <div id="lineupRoot" aria-live="polite">
+              <div style="margin:.5rem 0; font-weight:700;">Lade Line-up …</div>
+            </div>
             <div id="luError" style="margin-top:.5rem;font-weight:700;color:#FC411F;display:none;"></div>
           </div>
         </section>
@@ -287,99 +289,86 @@
   })();
   </script>
 
-  <!-- PapaParse (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" integrity="sha384-TsFjKc7E0h8tCk/7hCqZ/3t2x0hE3LwYqQe3A0mKXyq9b8m1pW5r6b3eB9Q2cZqT" crossorigin="anonymous"></script>
+  <!-- PapaParse (CDN) – SRI entfernt, damit es sicher lädt -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" crossorigin="anonymous"></script>
 
   <!-- JS: Dynamisches Line-up aus Google Sheets CSV -->
   <script>
   (function(){
-    // >>> HIER WIRD GENAU DEIN LINK VERWENDET <<<
+    // CSV genau von deinem Link:
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRkYgQhBk53GOGABV_qzv3ZqjgSfR61ZH9_fX-uejRTUOQ4EtAgARUXXIayqaPKWRr5hBRMCH219-_j/pub?output=csv";
-    // Deine Bilder liegen in /img relativ zur Seite:
-    const IMG_BASE = "img/"; // ACHTUNG: ohne führenden Slash, damit es relativ zum /fete/ Ordner funktioniert
+    // Bilder im Unterordner /fete/img/
+    const IMG_BASE = "img/";
 
-    // Day-Label-Erweiterung: Wenn CSV 'FR'/'Freitag' etc. enthält, hängen wir die Startzeit-Angabe dran.
-    function labelForDay(dayRaw){
-      const d = (dayRaw||"").toString().trim().toLowerCase();
-      const isFri = /^(fr|fri|freitag|fr\.|friday)/.test(d);
-      const isSat = /^(sa|sam|samstag|sa\.|saturday)/.test(d);
-      if (isFri) return "FR. 29. AUGUST · ab 14 Uhr";
-      if (isSat) return "SA. 30. AUGUST · ab 12 Uhr";
-      // sonst: Original anzeigen (falls du eigene Texte im CSV hast)
-      return dayRaw;
-    }
-
-    const root = document.getElementById('lineupRoot');
+    const root   = document.getElementById('lineupRoot');
     const errBox = document.getElementById('luError');
     if (!root) return;
 
-    const esc = (s) => {
-      return String(s ?? "")
-        .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
-    };
+    const showError = (msg) => { if (errBox){ errBox.style.display=''; errBox.textContent = msg; }};
 
-    // Normalisierung verschiedener Spaltennamen
-    const normalizeKey = (k) => (k||"").toString().trim().toLowerCase()
-      .replace(/\s+/g,'')
-      .replace('bandname','artist')
-      .replace('name','artist')
-      .replace('band','artist')
-      .replace('beschreibung','description')
-      .replace('desc','description')
-      .replace('bildurl','image')
-      .replace('bild','image')
-      .replace('tag','day')
-      .replace('startzeit','start')
-      .replace('endzeit','end')
-      .replace('time','start'); // <- deine CSV nutzt 'time'
+    // Helfer: BOM entfernen & normalisieren
+    const stripBOM = (s) => String(s ?? '').replace(/^\uFEFF/, '');
+    const clean = (s) => stripBOM(String(s ?? '').trim());
 
+    // Header-Key robust normalisieren
+    const normalizeKey = (k) => stripBOM(String(k||''))
+      .toLowerCase().trim().replace(/\s+/g,'')
+      .replace(/bandname|name|band/, 'artist')
+      .replace(/beschreibung|desc/, 'description')
+      .replace(/bildurl|bild|imageurl/, 'image')
+      .replace(/^tag$/, 'day')
+      .replace(/^zeit$|^time$/, 'start')
+      .replace(/^startzeit$/, 'start')
+      .replace(/^endzeit$/, 'end');
+
+    // Zeiten tolerant: "14", "14.00", "14:00"
     const parseTime = (t) => {
-      if (t == null) return null;
-      const raw = String(t).trim();
+      const raw = clean(t);
       if (!raw) return null;
-      // akzeptiere "14", "14.00", "14:00"
-      const s = raw.includes(':') ? raw : raw.replace('.',':') + (raw.includes(':') || raw.includes('.') ? '' : ':00');
-      const m = s.match(/^(\d{1,2})[:](\d{2})$/);
+      let s = raw;
+      if (/^\d{1,2}$/.test(s)) s = s + ':00';
+      s = s.replace('.', ':');
+      const m = s.match(/^(\d{1,2}):(\d{2})$/);
       if (!m) return null;
-      const hh = parseInt(m[1],10), mm = parseInt(m[2],10);
+      const hh = +m[1], mm = +m[2];
       if (hh<0||hh>23||mm<0||mm>59) return null;
-      return hh.toString().padStart(2,'0') + ":" + mm.toString().padStart(2,'0');
+      return String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
     };
+
+    // Day-Label fix für FR/SA
+    const labelForDay = (dayRaw) => {
+      const d = clean(dayRaw).toLowerCase();
+      if (/^(fr|fri|freitag|fr\.|friday)$/.test(d)) return "FR. 29. AUGUST · ab 14 Uhr";
+      if (/^(sa|sam|samstag|sa\.|saturday)$/.test(d)) return "SA. 30. AUGUST · ab 12 Uhr";
+      return clean(dayRaw) || "Tag";
+    };
+
+    function buildImgSrc(image){
+      const v = clean(image);
+      if (!v) return '';
+      if (/^https?:\/\//i.test(v) || v.startsWith('//')) return v;
+      return (IMG_BASE || '') + v.replace(/^\/+/, '');
+    }
 
     function groupByDay(rows){
-      const order = []; // Tagesreihenfolge nach Auftreten
+      const order = [];
       const map = {};
       rows.forEach(r=>{
-        const rawDay = (r.day || "").toString().trim();
-        if (!rawDay) return;
-        if (!map[rawDay]){
-          map[rawDay] = [];
-          order.push(rawDay);
-        }
-        map[rawDay].push(r);
+        const dayRaw = clean(r.day);
+        if (!dayRaw) return;
+        if (!map[dayRaw]) { map[dayRaw] = []; order.push(dayRaw); }
+        map[dayRaw].push(r);
       });
       return {order, map};
     }
 
-    function buildImgSrc(image){
-      if (!image) return "";
-      const trimmed = String(image).trim();
-      if (!trimmed) return "";
-      if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('//')) return trimmed;
-      // relativ aus /fete/ nach /fete/img/...
-      return (IMG_BASE || "") + trimmed.replace(/^\/+/, '');
-    }
-
     function renderDayBlock(dayRaw, acts){
-      const label = labelForDay(dayRaw);
-
       const line = document.createElement('div');
       line.className = 'line';
 
       const tag = document.createElement('div');
       tag.className = 'lineup-daytag';
-      tag.textContent = label;
+      tag.textContent = labelForDay(dayRaw);
       line.appendChild(tag);
 
       const ul = document.createElement('ul');
@@ -392,7 +381,6 @@
         btn.type = 'button';
         btn.className = 'lu-act';
         btn.textContent = a.artist;
-
         btn.addEventListener('click', ()=>openDialog(a));
         li.appendChild(btn);
         ul.appendChild(li);
@@ -406,113 +394,97 @@
       const dlg = document.getElementById('luDialog');
       if (!dlg) return;
 
-      const imgEl = dlg.querySelector('.lu-media');
-      const titleEl = dlg.querySelector('.lu-title');
+      const imgEl  = dlg.querySelector('.lu-media');
+      const title  = dlg.querySelector('.lu-title');
       const timeEl = dlg.querySelector('.lu-time');
-      const descEl = dlg.querySelector('.lu-desc');
+      const desc   = dlg.querySelector('.lu-desc');
 
       // Bild
       const src = buildImgSrc(a.image);
-      if (src) {
+      if (src){
         imgEl.src = src;
         imgEl.alt = a.artist ? `Foto: ${a.artist}` : "Bandfoto";
         imgEl.parentElement.style.display = '';
-        imgEl.onerror = () => { imgEl.parentElement.style.display = 'none'; };
+        imgEl.onerror = ()=>{ imgEl.parentElement.style.display='none'; };
       } else {
         imgEl.src = '';
         imgEl.parentElement.style.display = 'none';
       }
 
-      // Titel, Zeit, Beschreibung
-      titleEl.textContent = a.artist || '';
+      title.textContent = a.artist || '';
       timeEl.textContent = (a.start && a.end) ? `${a.start}–${a.end}` : (a.start || '');
-      descEl.textContent = a.description || '';
+      desc.textContent = a.description || '';
 
-      if (typeof dlg.showModal === 'function') {
-        dlg.showModal();
-      } else {
-        // Fallback
-        dlg.setAttribute('open','');
-      }
+      if (typeof dlg.showModal === 'function') dlg.showModal();
+      else dlg.setAttribute('open','');
     }
 
-    function showError(msg){
-      if (!errBox) return;
-      errBox.style.display = '';
-      errBox.textContent = msg;
-    }
-
-    (function init(){
-      Papa.parse(CSV_URL, {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: (res)=>{
-          try {
-            const rows = (res.data || [])
-              .map(row=>{
-                // normalisierte Keys
-                const obj = {};
-                Object.keys(row).forEach(k=>{
-                  obj[ normalizeKey(k) ] = row[k];
-                });
-
-                const artist = (obj.artist || "").toString().trim();
-                const day    = (obj.day    || "").toString().trim();
-                const start  = parseTime(obj.start);
-                const end    = parseTime(obj.end);
-                const description = (obj.description || "").toString();
-                const image  = (obj.image || "").toString();
-
-                if (!artist || !day) return null; // zwingend
-                return { artist, day, start, end, description, image };
-              })
-              .filter(Boolean);
-
-            if (!rows.length){
-              showError("Keine Einträge in der CSV gefunden.");
-              return;
-            }
-
-            // gruppieren & sortieren pro Tag nach Startzeit
-            const {order, map} = groupByDay(rows);
-            order.forEach(dayRaw=>{
-              const acts = map[dayRaw]
-                .sort((a,b)=>{
-                  if (a.start && b.start) return a.start.localeCompare(b.start);
-                  if (a.start) return -1;
-                  if (b.start) return 1;
-                  return a.artist.localeCompare(b.artist);
-                });
-              const block = renderDayBlock(dayRaw, acts);
-              root.appendChild(block);
+    // Render-Start
+    Papa.parse(CSV_URL, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: (res)=>{
+        try {
+          // Header robust normalisieren (auch mit BOM)
+          const rows = (res.data || []).map(orig=>{
+            const row = {};
+            Object.keys(orig).forEach(k=>{
+              row[ normalizeKey(k) ] = orig[k];
             });
-          } catch(e){
-            console.error(e);
-            showError("Fehler beim Verarbeiten der CSV.");
-          }
-        },
-        error: (err)=>{
-          console.error(err);
-          showError("CSV konnte nicht geladen werden.");
-        }
-      });
+            const artist = clean(row.artist || row.name);
+            const day    = clean(row.day);
+            const start  = parseTime(row.start);
+            const end    = parseTime(row.end);
+            const image  = clean(row.image);
+            const description = String(row.description ?? '');
 
-      // Dialog schließen
-      const dlg = document.getElementById('luDialog');
-      if (dlg){
-        dlg.addEventListener('click', (e)=>{
-          const card = dlg.querySelector('.lu-card');
-          if (!card) return;
-          const rect = card.getBoundingClientRect();
-          const inside = (e.clientX >= rect.left && e.clientX <= rect.right &&
-                          e.clientY >= rect.top  && e.clientY <= rect.bottom);
-          if (!inside) dlg.close();
-        });
-        dlg.querySelector('.lu-close')?.addEventListener('click', ()=>dlg.close());
-        dlg.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') dlg.close(); });
+            if (!artist || !day) return null; // zwingend
+            return { artist, day, start, end, image, description };
+          }).filter(Boolean);
+
+          // Container leeren (Ladeanzeige weg)
+          root.innerHTML = '';
+
+          if (!rows.length){
+            showError('Keine Einträge in der CSV gefunden.');
+            return;
+          }
+
+          const {order, map} = groupByDay(rows);
+          order.forEach(dayRaw=>{
+            const acts = map[dayRaw].sort((a,b)=>{
+              if (a.start && b.start) return a.start.localeCompare(b.start);
+              if (a.start) return -1;
+              if (b.start) return 1;
+              return a.artist.localeCompare(b.artist);
+            });
+            root.appendChild( renderDayBlock(dayRaw, acts) );
+          });
+        } catch(e){
+          console.error(e);
+          showError('Fehler beim Verarbeiten der CSV.');
+        }
+      },
+      error: (err)=>{
+        console.error(err);
+        showError('CSV konnte nicht geladen werden.');
       }
-    })();
+    });
+
+    // Dialog schließen (Klick außerhalb, ESC)
+    const dlg = document.getElementById('luDialog');
+    if (dlg){
+      dlg.addEventListener('click', (e)=>{
+        const card = dlg.querySelector('.lu-card');
+        if (!card) return;
+        const r = card.getBoundingClientRect();
+        const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+        if (!inside) dlg.close();
+      });
+      dlg.querySelector('.lu-close')?.addEventListener('click', ()=>dlg.close());
+      dlg.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') dlg.close(); });
+    }
   })();
   </script>
 
