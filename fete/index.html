@@ -10,11 +10,10 @@
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet" />
-  <!-- „gestempelte“ Schrift nur fürs Line-up -->
   <link href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap" rel="stylesheet">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="../styles.css?v=fete-dialog-fix-1" />
+  <link rel="stylesheet" href="../styles.css?v=fete-mobile-sheet-fix-2" />
 </head>
 <body class="fete-page">
 
@@ -44,7 +43,7 @@
     <section class="container page-inner page-inner--wide">
       <div class="page-text">
 
-        <!-- Banner (einfaches IMG) -->
+        <!-- Banner -->
         <section class="fete-banner" aria-label="Festival-Banner">
           <img class="fete-banner-img" src="fete-banner.svg" alt="Fête du Seeee – Banner" />
         </section>
@@ -56,7 +55,7 @@
           <span>29. &amp; 30. August 2025</span>
         </div>
 
-        <!-- Intro-Text -->
+        <!-- Intro -->
         <section class="info-block">
           <p>
             Dieses Jahr wird unsere Fête du Seeee noch bunter und größer:
@@ -88,14 +87,12 @@
           <div class="lineup-wrap">
             <div class="lineup-heading">Line-Up</div>
 
-            <!-- Dynamisch erzeugter Inhalt -->
             <div id="lineupRoot" aria-live="polite">
               <div style="margin:.5rem 0; font-weight:700;">Lade Line-up …</div>
             </div>
             <div id="luError" style="margin-top:.5rem;font-weight:700;color:#FC411F;display:none;"></div>
           </div>
         </section>
-        <!-- ===== /LINE-UP ===== -->
 
         <!-- Eintritt -->
         <section class="entry">
@@ -106,10 +103,8 @@
             <li>Ermäßigt: 4 €</li>
             <li>Ab 18 Uhr: 2,50 €</li>
           </ul>
-          <p>
-            Kommt vorbei, bringt eure Freund*innen mit und lasst uns gemeinsam am
-            Tegeler See feiern – wir freuen uns auf euch!
-          </p>
+          <p>Kommt vorbei, bringt eure Freund*innen mit und lasst uns gemeinsam am
+            Tegeler See feiern – wir freuen uns auf euch!</p>
         </section>
 
       </div>
@@ -129,10 +124,10 @@
   </footer>
 
   <!-- Modal / Bottom-Sheet -->
-  <!-- WICHTIG: kein 'open' Attribut im Markup -->
   <dialog id="luDialog" class="lu-dialog" aria-label="Banddetails">
     <form method="dialog" class="lu-card">
-      <button class="lu-close" aria-label="Schließen">×</button>
+      <!-- Fix: type="button" + bleibt über dem Content -->
+      <button type="button" class="lu-close" aria-label="Schließen">×</button>
       <div class="lu-media-wrap">
         <img class="lu-media" alt="" loading="lazy" />
       </div>
@@ -156,7 +151,7 @@
     }
   </script>
 
-  <!-- JS: Slideshow-Loader (robust, JPG/MP4 1–9) -->
+  <!-- JS: Slideshow -->
   <script>
   (function(){
     const slider = document.getElementById('feteSlider');
@@ -290,20 +285,20 @@
   })();
   </script>
 
-  <!-- PapaParse (CDN) – ohne SRI & crossorigin -->
+  <!-- PapaParse -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-  <!-- JS: Dynamisches Line-up aus Google Sheets CSV -->
+  <!-- JS: Line-up -->
   <script>
   (function(){
     const CSV_URL = "https://docs.google.com/spreadsheets/d/1ccOWpPbauEwZNuod_84vyMTbKHqi6srRUll1eN1c72A/export?format=csv&gid=0";
-    const IMG_BASE = "bandinfo/img/"; // relativ zu /fete/
+    const IMG_BASE = "bandinfo/img/";
 
     const root   = document.getElementById('lineupRoot');
     const errBox = document.getElementById('luError');
     const dlg    = document.getElementById('luDialog');
 
-    // SAFEGUARD: Dialog sicher geschlossen beim Start
+    // SAFEGUARD: Dialog zu Start geschlossen
     if (dlg) {
       try { dlg.close(); } catch(_) {}
       dlg.removeAttribute('open');
@@ -499,6 +494,10 @@
 
     // Dialog schließen (Klick außerhalb, ESC, Close-Button)
     if (dlg){
+      // Close-Button: extra robust für Mobile
+      dlg.querySelector('.lu-close')?.addEventListener('click', ()=>dlg.close());
+      dlg.querySelector('.lu-close')?.addEventListener('touchend', ()=>dlg.close(), {passive:true});
+
       dlg.addEventListener('click', (e)=>{
         const card = dlg.querySelector('.lu-card');
         if (!card) return;
@@ -506,7 +505,6 @@
         const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
         if (!inside) dlg.close();
       });
-      dlg.querySelector('.lu-close')?.addEventListener('click', ()=>dlg.close());
       dlg.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') dlg.close(); });
     }
   })();
