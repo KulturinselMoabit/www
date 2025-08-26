@@ -265,13 +265,13 @@ body {
   text-transform: uppercase; letter-spacing: .03em; line-height: 1.15;
   color: var(--primary);
   font-size: clamp(var(--lineup-min), var(--lineup-vw), var(--lineup-max));
-  margin: 0 .8em;                 /* Abstand links/rechts */
-  overflow-wrap: normal;          /* keine automatische Trennung */
-  word-break: keep-all;           /* ganze Wörter umbrechen */
-  hyphens: manual;                /* nur manuelle Trennung */
+  margin: 0 .8em;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: manual;
 }
 
-/* Klickfläche Bandname (wie Text) + rote Hover-Underline */
+/* Klickfläche Bandname */
 .fete-page .lineup .acts .lu-act{
   background: none; border: none; padding: 0; margin: 0;
   font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit;
@@ -279,21 +279,16 @@ body {
 }
 .fete-page .lineup .acts .lu-act::after{
   content: '';
-  position: absolute;
-  left: 0; right: 0; bottom: -0.15em;
-  height: 0.18rem;
-  background: var(--highlight);
+  position: absolute; left: 0; right: 0; bottom: -0.15em;
+  height: 0.18rem; background: var(--highlight);
   transform: scaleX(0);
   transform-origin: center;
   transition: transform .25s ease;
 }
 .fete-page .lineup .acts .lu-act:hover::after,
-.fete-page .lineup .acts .lu-act:focus-visible::after{
-  transform: scaleX(1);
-}
+.fete-page .lineup .acts .lu-act:focus-visible::after{ transform: scaleX(1); }
 .fete-page .lineup .acts .lu-act:focus-visible{
-  outline: 2px solid var(--highlight);
-  outline-offset: 2px;
+  outline: 2px solid var(--highlight); outline-offset: 2px;
 }
 
 /* Keine Punkte zwischen Bands */
@@ -309,31 +304,26 @@ body {
 .fete-page .entry p { margin-bottom: .75rem; }
 .fete-page .entry ul { list-style: none; margin: 0 0 1rem 0; padding: 0; }
 .fete-page .entry li { margin: .25rem 0; }
-/* "Eintritt" zentriert mit Linie in Textbreite */
 .fete-page .entry .section-title{
-  display: block;
-  width: max-content;
-  margin: .25rem auto 1rem;
-  text-align: center;
+  display: block; width: max-content; margin: .25rem auto 1rem; text-align: center;
 }
 
 /* ================= Modal / Bottom-Sheet (nur Fête) ================== */
-/* Dialog selbst als fullscreen Overlay-Container; Card wird darin zentriert */
 .fete-page .lu-dialog {
   border: none;
   background: transparent;
   padding: 0;
   margin: 0;
-  inset: 0;                 /* volle Viewport-Fläche */
+  /* WICHTIG: echtes Overlay */
+  position: fixed;           /* << neu: sorgt für Top-Layer-Fullscreen */
+  inset: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;            /* << neu: mobiles Viewport-Handling */
   max-width: none;
-  display: grid;            /* zentrieren am Desktop */
-  place-items: center;
+  display: grid;
+  place-items: center;       /* Desktop mittig … */
 }
-.fete-page .lu-dialog::backdrop {
-  background: rgba(0,0,0,.45);
-}
+.fete-page .lu-dialog::backdrop { background: rgba(0,0,0,.45); }
 
 /* Die sichtbare Box */
 .fete-page .lu-card {
@@ -343,10 +333,10 @@ body {
   border-radius: 14px;
   width: min(92vw, 720px);
   max-width: 100%;
-  max-height: 85vh;         /* begrenzen */
+  max-height: 85dvh;         /* << dvh */
   display: grid;
   grid-template-rows: auto 1fr;
-  overflow: hidden;         /* Medien fixieren, Inhalt scrollt */
+  overflow: hidden;          /* Medien fixieren, Inhalt scrollt */
   position: relative;
 }
 
@@ -360,23 +350,14 @@ body {
 /* Textbereich – SCROLLBAR für lange Inhalte */
 .fete-page .lu-content {
   padding: 1rem 1rem 1.25rem;
-  overflow: auto;                 /* <-- Scrollbar */
+  overflow: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable both-edges;
-  overscroll-behavior: contain;   /* verhindert Durchscrollen der Seite */
+  overscroll-behavior: contain;
 }
-
-.fete-page .lu-title {
-  font-size: clamp(1.2rem, 3.5vw, 1.6rem);
-  font-weight: 800; margin-bottom: .4rem;
-}
-.fete-page .lu-time {
-  font-weight: 700; margin-bottom: .6rem;
-}
-.fete-page .lu-desc {
-  white-space: pre-wrap;
-  line-height: 1.35;
-}
+.fete-page .lu-title { font-size: clamp(1.2rem, 3.5vw, 1.6rem); font-weight: 800; margin-bottom: .4rem; }
+.fete-page .lu-time  { font-weight: 700; margin-bottom: .6rem; }
+.fete-page .lu-desc  { white-space: pre-wrap; line-height: 1.35; }
 
 /* Close-Button */
 .fete-page .lu-close{
@@ -386,18 +367,18 @@ body {
   width: 32px; height: 32px; line-height: 32px;
   font-size: 20px; font-weight: 800; color: var(--primary);
   cursor: pointer;
-  z-index: 5;                 /* << fix: immer oben */
+  z-index: 5;
 }
 .fete-page .lu-close:focus-visible{ outline: 2px solid var(--highlight); outline-offset: 2px; }
 
-/* Mobile: Bottom-Sheet */
+/* Mobile: echtes Bottom-Sheet */
 @media (max-width: 768px){
   .fete-page .lu-dialog{
-    place-items: end center;  /* unten andocken */
+    place-items: end center;      /* << neu: unten andocken */
   }
   .fete-page .lu-card{
     width: 100vw;
-    max-height: 90vh;         /* höher auf kleinen Screens */
+    max-height: 90dvh;            /* << neu: dvh */
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
@@ -417,12 +398,8 @@ body {
     padding-inline: 2px;
   }
 }
-.fete-page img,
-.fete-page video {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  box-sizing: border-box;
+.fete-page img, .fete-page video {
+  display: block; max-width: 100%; height: auto; box-sizing: border-box;
 }
 .fete-page { overflow-x: hidden; }
 .fete-page .lineup .acts { padding-inline: .25rem; }
@@ -430,5 +407,5 @@ body {
 .fete-page .fete-dots { padding: 0 .35rem; }
 .fete-page .fete-control { width: 2rem; height: 2rem; line-height: 2rem; }
 
-/* ======= Sichtbarkeit: Dialog nur mit [open] sichtbar ======= */
+/* Dialog nur sichtbar, wenn [open] gesetzt ist */
 .fete-page .lu-dialog:not([open]) { display: none !important; }
