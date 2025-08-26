@@ -363,6 +363,7 @@ body {
   overflow: auto;                 /* <-- Scrollbar */
   -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable both-edges;
+  overscroll-behavior: contain;   /* verhindert Durchscrollen der Seite */
 }
 
 .fete-page .lu-title {
@@ -385,6 +386,7 @@ body {
   width: 32px; height: 32px; line-height: 32px;
   font-size: 20px; font-weight: 800; color: var(--primary);
   cursor: pointer;
+  z-index: 5;                 /* << fix: immer oben */
 }
 .fete-page .lu-close:focus-visible{ outline: 2px solid var(--highlight); outline-offset: 2px; }
 
@@ -428,5 +430,5 @@ body {
 .fete-page .fete-dots { padding: 0 .35rem; }
 .fete-page .fete-control { width: 2rem; height: 2rem; line-height: 2rem; }
 
-/* ======= MINI-FIX: Dialog nur sichtbar, wenn [open] gesetzt ist ======= */
+/* ======= Sichtbarkeit: Dialog nur mit [open] sichtbar ======= */
 .fete-page .lu-dialog:not([open]) { display: none !important; }
